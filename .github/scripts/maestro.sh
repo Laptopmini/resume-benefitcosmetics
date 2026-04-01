@@ -11,7 +11,7 @@ set -euo pipefail
 LOCK_FILE=".maestro.lock"
 LOG_FILE=".maestro.log"
 BLUEPRINT_FILE=".maestro.blueprint.md"
-ENGINE="claude"
+ENGINE="claude" # FIXME: Use env variable `ENGINE` with default value `claude`
 
 # Functions
 
@@ -92,5 +92,26 @@ done
 # $(prompt "/ticketmaster
 # $BLUEPRINT
 # ")
+
+# FIXME: The ticketmaster prompt draft needs to indicate the expected output, array of pr names
+
+# FIXME: Prevent blueprint from generating test files as it may conflict with TDD
+# 2. [logic] Create `tests/unit/timer-logic.test.ts` — test `formatTime` (25:00, 00:00, 09:59 edge cases), test `tick` (decrements, does not go below 0), test duration constant equals 1500
+# MAKE IT CREATE A TICKET FOR TEST COVERAGE, GATHER THEM ALL AS PART OF A UNIQUE PRD ALWAYS THE LAST ONE?
+
+
+# ASK IF USER TO HIT ENTER WHEN READY TO REVIEW PRs
+# OPEN PR PAGE URL
+
+# ASK IF USER FINISHED REVIEWING PRs
+# CHECK IF PRS WERE MERGED
+    # IF YES, BRANCH OUT `prd-X-backpressure` AND RUN BACKPRESSURE, OPEN PR BACK AGAINST `prd-X`
+    # IF NO, ERROR OUT?
+
+# ASK IF USER TO HIT ENTER WHEN READY TO REVIEW PRs
+# OPEN PR PAGE URL
+
+# ASK IF USER FINISHED REVIEWING PRs
+    # IF YES, For each `dev-prd-X` branch, execute `ralph.sh` in parallel and open PR against `main`.
 
 echo "✅ Done!."
