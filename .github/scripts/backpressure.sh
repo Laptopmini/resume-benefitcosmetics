@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # ==============================================================================
 # BACKPRESSURE GENERATOR: Generate tests based on current PRD

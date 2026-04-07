@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Usage: prompt.sh "<agent prompt>" [extra args...]
 # Returns agent output on stdout. Narrates progress + echoes agent output on stderr.
 # 

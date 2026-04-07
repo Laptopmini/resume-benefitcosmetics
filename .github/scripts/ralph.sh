@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # ==============================================================================
 # RALPH LOOP: The test-gated, autonomous AI development cycle

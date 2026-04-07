@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # ==============================================================================
 # FORK REPO: Create a fork of the current repo within your own organization,
