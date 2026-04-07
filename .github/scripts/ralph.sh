@@ -8,18 +8,19 @@
 set -euo pipefail
 
 # Settings
+
 ARCHIVE_FOLDER=".prds"
 LOCK_FILE=".ralph.lock"
 
-# Options
+# Default Options
+
 MAX_LOOPS=10
 
-# Variables
-LOOP_COUNTER=0
+# Functions
 
 prompt() { bash .github/scripts/prompt.sh "$@"; }
 
-# ==============================================================================
+# Main
 
 if [ -e "$LOCK_FILE" ]; then
     echo "❌ Error: Ralph Loop is already running! Exiting..."
@@ -42,6 +43,7 @@ fi
 echo "🟢 Starting Ralph Loop for at most $MAX_LOOPS iterations..."
 
 ERROR_FEEDBACK=""
+LOOP_COUNTER=0
 
 while true; do
     echo "------------------------- Iteration $((LOOP_COUNTER + 1))/$MAX_LOOPS -------------------------"

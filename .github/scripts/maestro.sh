@@ -8,29 +8,43 @@
 set -euo pipefail
 
 # Settings
+
 LOCK_FILE=".maestro.lock"
 LOG_FILE="tmp/maestro.log"
 BLUEPRINT_FILE=".maestro.blueprint.md"
+REPO_SLUG=$(bash .github/scripts/repo-slug.sh)
 
 # Functions
 
 prompt() { bash .github/scripts/prompt.sh "$@"; }
 
-open_pull_requests() {
+view_pull_requests() {
     read -n 1 -s -r -p "💬 Are you ready to review the Pull Request(s)? Press any key to open in browser..."
-    open $(gh repo view --json url -q ".url + \"/pulls\"")
+    local url
+    url=$(gh repo view --json url -q ".url + \"/pulls\"")
+    if command -v xdg-open &>/dev/null; then
+        xdg-open "$url"
+    elif command -v open &>/dev/null; then
+        open "$url"
+    elif command -v start &>/dev/null; then
+        start "$url"
+    else
+        echo "🟠 Could not detect a browser opener. Visit: $url"
+    fi
 }
+
 
 review_pull_requests() {
     # FIXME: Could have Claude do an initial review of the PRs to improve user's review/approval
-    open_pull_requests
+    view_pull_requests
     read -n 1 -s -r -p "💬 Once all Pull Requests have been merged, press any key to continue..."
 
     local UNVERIFIED=true
     while $UNVERIFIED; do
         local ALL_MERGED=true
         while IFS= read -r LINE; do
-            local PR_NUMBER=$(echo "$LINE" | sed 's/.*#\([0-9]*\)).*/\1/')
+            local PR_NUMBER
+            PR_NUMBER=$(echo "$LINE" | sed 's/.*#\([0-9]*\)).*/\1/')
             
             if [ -z "$PR_NUMBER" ]; then
                 # Unable to extract PR number from line
@@ -38,17 +52,17 @@ review_pull_requests() {
                 break
             fi
 
-            local state=$(gh pr view "$PR_NUMBER" --json state --jq '.state')
+            local STATE
+            STATE=$(gh pr view "$PR_NUMBER" --json state --jq '.state')
             
-            if [ "$state" != "MERGED" ]; then
+            if [ "$STATE" != "MERGED" ]; then
                 ALL_MERGED=false
                 break
             fi
 
-            # FIXME: Remove hard-coded repo and leverage repo-slug.sh when this is its own script
-
             # Clean up the local branch
-            local BRANCH_NAME=$(gh pr view "$PR_NUMBER" --repo Laptopmini/ralph-maestro-demo --json headRefName --jq '.headRefName')
+            local BRANCH_NAME
+            BRANCH_NAME=$(gh pr view "$PR_NUMBER" --repo "$REPO_SLUG" --json headRefName --jq '.headRefName')
             if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
                 git branch -D "$BRANCH_NAME"
             fi
@@ -70,7 +84,7 @@ cleanup() {
     fi
 }
 
-# ==============================================================================
+# Main
 
 if [ -e "$LOCK_FILE" ]; then
     echo "❌ Error: Maestro is already running! Exiting..."
@@ -105,7 +119,14 @@ while $MISSING_BLUEPRINT; do
         exit 1
     fi
 
-    FOLDER_NAME="docs/$(head -1 "$BLUEPRINT_FILE" | sed 's/## Implementation Plan: //g' | tr ' ' '-' | tr '[:upper:]' '[:lower:]')"
+    FIRST_LINE=$(head -1 "$BLUEPRINT_FILE")
+    if [[ "$FIRST_LINE" =~ ^##\ Implementation\ Plan:\ .+ ]]; then
+        EXTRACTED_NAME=$(echo "$FIRST_LINE" | sed 's/## Implementation Plan: //g' | tr ' ' '-' | tr '[:upper:]' '[:lower:]')
+    else
+        EXTRACTED_NAME="new-feature"
+        echo "🟠 Could not parse blueprint name from header. Defaulting to '$EXTRACTED_NAME'."
+    fi
+    FOLDER_NAME="docs/$EXTRACTED_NAME"
 
     COUNTER=0
     BASE="$FOLDER_NAME"
@@ -132,8 +153,6 @@ while $MISSING_BLUEPRINT; do
         rm -rf "$BLUEPRINT_FILE" "$FOLDER_NAME"
     fi
 done
-
-REPO_SLUG=$(bash .github/scripts/repo-slug.sh)
 
 echo "⚪️ Proceeding through implementation tree levels..."
 while IFS= read -r LEVEL; do
@@ -220,7 +239,7 @@ git commit -m "chore(ai): Add Maestro log"
 git push -u origin maestro
 prompt "/summarizer $REPO_SLUG maestro main" --model claude-haiku-4-5
 
-open_pull_requests
+view_pull_requests
 
 echo "⚪️ Switching back to main..."
 git checkout main
