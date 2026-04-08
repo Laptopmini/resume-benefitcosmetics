@@ -61,6 +61,6 @@ $LEDGER
 $PRD
 "
 
-prompt "$AGENT_PROMPT" --allowedTools "Read,Write,Glob,Grep" --model qwen/qwen3.5-35b-a3b
+prompt "$AGENT_PROMPT" --allowedTools "Read,Write,Glob,Grep" --model opus
 
 echo "✅ Tests generated. Please review them, and then execute the Ralph loop."

@@ -39,6 +39,20 @@ if [[ "$MODEL" != "opus" && "$MODEL" != "sonnet" && "$MODEL" != "haiku" ]]; then
     # Make sure the model has been loaded
     bash .github/scripts/load-model.sh "$MODEL"
 
+    # Determine the max context window size for the model
+    # Make sure this is up to date with your LM Studio configuration!
+    case "$MODEL" in
+        qwen/qwen3.5-35b-a3b)
+            MAX_CONTEXT_WINDOW=262144
+            ;;
+        google/gemma-4-26b-a4b)
+            MAX_CONTEXT_WINDOW=120000
+            ;;
+        *)
+            MAX_CONTEXT_WINDOW=4000
+            ;;
+    esac
+
     # Setup Claude Code environment variables
     LOCAL_ENV=(
         ANTHROPIC_BASE_URL="http://localhost:1234"
