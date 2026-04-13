@@ -208,19 +208,17 @@ LEVEL_INDEX=0
 while IFS= read -r LEVEL; do
     log INFO "Beginning level \"$LEVEL\"..."
     LEVEL_INDEX=$((LEVEL_INDEX + 1))
-    SLICED="$SLICE_FILE"
-    log INFO "Slicing plan into \"$SLICED\"..."
-    bash .github/scripts/slice-plan.sh "$BLUEPRINT_FILE" "$LEVEL" "$SLICED"
-    if [ ! -s "$SLICED" ]; then
-        log ERROR "Sliced plan '$SLICED' is missing or empty. Aborting."
-        exit 1
-    fi
 
     log INFO "Generating PRD(s)..."
     rm -f "$PR_TSV_FILE"
-    prompt "/ticketmaster \"$SLICED\"" --allowedTools "Read,Write,Bash,Glob,Grep" --model qwen/qwen3.5-35b-a3b || true
-
-    mv -f "$SLICED" "$FOLDER_NAME/plan-level-$LEVEL_INDEX.md"
+    for TICKET_NUM in $(echo "$LEVEL" | tr ',' '\n' | grep .); do
+        TICKETMASTER_PROMPT=$(bash .github/scripts/get-prompt.sh "$BLUEPRINT_FILE" "$TICKET_NUM")
+        bash .github/scripts/ticketmaster/checkout.sh "$TICKET_NUM"
+        prompt "$TICKETMASTER_PROMPT" --allowedTools "Write" --model qwen/qwen3.5-35b-a3b || true
+        TICKET_TITLE=$(awk -v n="$TICKET_NUM" '$0 ~ "^#### Ticket " n ":" { sub(/^#### Ticket [0-9]+: */, ""); print; exit }' "$BLUEPRINT_FILE")
+        bash .github/scripts/ticketmaster/push-changes.sh "$TICKET_NUM" "$TICKET_TITLE"
+        echo "$TICKETMASTER_PROMPT" > "$FOLDER_NAME/ticketmaster-$TICKET_NUM.md"
+    done
 
     EXPECTED_COUNT=$(echo "$LEVEL" | tr ',' '\n' | grep -c .)
 

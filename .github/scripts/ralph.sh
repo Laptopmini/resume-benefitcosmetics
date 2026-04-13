@@ -146,7 +146,7 @@ $PRD_CONTENT
     PROPOSED_LEDGER=$(echo "$OUTPUT" | awk '/<ledger>/{flag=1; next} /<\/ledger>/{flag=0} flag')
 
     log INFO "Running Validation: $TARGETED_TEST"
-    ALLOWED_PREFIXES=("npm test" "npx jest" "npx playwright" "npx tsc" "npx biome")
+    ALLOWED_PREFIXES=("npm test" "npx jest" "npx playwright" "npx tsc" "npx biome" "bash scripts/")
     ALLOWED=false
     for prefix in "${ALLOWED_PREFIXES[@]}"; do
         if [[ "$TARGETED_TEST" == "$prefix"* ]]; then
