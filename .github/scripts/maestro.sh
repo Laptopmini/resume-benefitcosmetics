@@ -28,8 +28,9 @@ PR_TSV_FILE=".maestro.pull-requests.tsv"
 export STAFF_DEVELOPER_MODEL="opus" # Planning & Backpressure
 export SENIOR_DEVELOPER_MODEL="qwen/qwen3.5-35b-a3b" # Ticket Breakdown
 export MIDLEVEL_DEVELOPER_MODEL="qwen/qwen3-coder-30b" # PR Descriptions
-export JUNIOR_DEVELOPER_MODEL="$MIDLEVEL_DEVELOPER_MODEL" # Implementation
+export JUNIOR_DEVELOPER_MODEL="qwen/qwen3-coder-30b" # Implementation
 
+# FIXME: Try using minimax/MiniMax-M2.7 for Planning & Backpressure
 # FIXME: Try using google/gemma-4-26b-a4b for PR Descriptions
 
 # Variables

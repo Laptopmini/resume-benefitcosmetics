@@ -76,6 +76,9 @@ prompt() {
             # Determine the max context window size for the model
             local MAX_CONTEXT_WINDOW=4000
             case "$MODEL" in
+                qwen/qwen3-coder-30b)
+                    MAX_CONTEXT_WINDOW=180000
+                    ;;
                 qwen/qwen3.5-35b-a3b)
                     MAX_CONTEXT_WINDOW=262144
                     ;;
