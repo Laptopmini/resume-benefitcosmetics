@@ -1,6 +1,6 @@
-# ralph-node-base
+# ralph-resume
 
-A fork of [ralph-node](https://github.com/Laptopmini/ralph-node) that has been initialized by running the bootstrap PRD. Save some tokens by using this as a starting point, or just do it yourself!
+A fork of [ralph-node](https://github.com/Laptopmini/ralph-node) that was prompted to build a website based on my resume, hosted on GitHub Pages.
 
 For full documentation on how to use `ralph-node` and these repos, see the [original ralph-node README](https://github.com/Laptopmini/ralph-node#readme).
 
