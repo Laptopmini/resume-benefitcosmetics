@@ -7,4 +7,4 @@ const config = {
   testMatch: ["**/tests/unit/**/*.test.ts"],
 };
 
-module.exports = config;
+export default config;
