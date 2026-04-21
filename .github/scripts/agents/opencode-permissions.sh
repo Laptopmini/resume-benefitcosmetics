@@ -21,9 +21,15 @@ get_opencode_permissions() {
     local NEW_PERMISSIONS=$(jq -Rn \
         --arg allowed "$ALLOWED_INPUT" \
         --arg disallowed "$DISALLOWED_INPUT" '
+        def rename_agent:
+            if . == "Agent" then "task"
+            elif startswith("Agent(") then "task" + .[5:]
+            else .
+            end;
+
         def parse_list(s):
             if (s | length) == 0 then []
-            else (s | split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0)))
+            else (s | split(",") | map(gsub("^\\s+|\\s+$"; "")) | map(select(length > 0)) | map(rename_agent))
             end;
 
         def apply(perm; action):

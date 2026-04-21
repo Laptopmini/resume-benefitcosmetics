@@ -76,7 +76,7 @@ prompt() {
         ((i++)) || true
     done
 
-    if [[ "$MODEL" != "opus" && "$MODEL" != "sonnet" && "$MODEL" != "haiku" ]]; then
+    if [[ "$MODEL" != claude-* ]]; then
         bash .github/scripts/agents/load-model.sh "$MODEL"
 
         if [[ "$CLI" == "claude" ]]; then

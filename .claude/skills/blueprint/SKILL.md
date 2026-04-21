@@ -101,15 +101,20 @@ Before writing the plan, think carefully about how areas of work relate to each 
 - **Backend/API work** — schema, migrations, route handlers, business logic
 - **Frontend/UI work** — components, pages, stores
 - **Infrastructure/config** — environment variables, feature flags, third-party service setup
+- **CI/CD & deployment** — GitHub Actions workflows, build pipelines, hosting configuration (e.g. GitHub Pages, Vercel). Deployment pipelines are a distinct workstream — do not bury them inside a UI or backend ticket
 
 A workstream becomes a **ticket**. If the feature is simple enough that all work is interdependent, one ticket is correct — do not force a split.
+
+**Dependency installation rule:** If the feature introduces new frameworks or libraries, the *first task* of the *root ticket* (a ticket with no `depends_on`) must install all required dependencies via an explicit `npm install` command before any other task references those packages. A child ticket must never install dependencies that its parent already installed — declare `depends_on` instead.
 
 **Dependency rules:**
 - A ticket may declare `depends_on: [Ticket N]` to indicate it requires another ticket's outputs (files, exports, routes) to exist first
 - A child ticket may **import from** files created by its parent ticket, but must never **modify** them
 - **Scheduling:** A ticket is workable once all tickets in its `depends_on` list are complete. Any two tickets whose dependencies are both satisfied can run in parallel (this includes siblings under the same parent)
-- Prefer shallow trees (depth ≤ 2). If you find yourself nesting 3+ levels deep, re-evaluate the split — the granularity is likely too fine
+- Prefer shallow trees (depth ≤ 2). If you find yourself nesting 3+ levels deep, re-evaluate the split — the granularity is likely too fine. However, depth 3 is acceptable when the layers represent genuinely distinct concerns that own different files (e.g. infra/config → UI shell/layout → feature sections → deployment). If you go to depth 3, justify it briefly in the Assumptions section
 - Do not duplicate logic to avoid a dependency. If a ticket would reimplement something another ticket already creates, add a `depends_on` instead
+
+**Design foundation rule:** For UI-heavy features, create a foundation ticket that establishes the shared visual layer before any section-specific UI tickets: theme/design-token configuration (e.g. Tailwind theme, CSS variables), global styles, font loading, the app shell (root layout, navigation skeleton), and any shared utility components. All UI tickets should declare `depends_on` this foundation ticket so they build on a consistent visual base rather than each inventing their own styles.
 
 **Key rule:** Two tickets must never touch the same file. If they would, merge them into one ticket.
 
@@ -312,7 +317,7 @@ Before outputting the plan, verify:
 - [ ] If a ticket's tasks require output from another ticket, `depends_on` is declared explicitly
 - [ ] No ticket implicitly requires another ticket's output without declaring `depends_on`
 - [ ] Child tickets never modify files owned by their parent — they may only import/read from them
-- [ ] Dependency depth is ≤ 2 levels (parent → child, not parent → child → grandchild)
+- [ ] Dependency depth is ≤ 2 levels by default. If depth 3 is used, each layer owns distinct files and the justification is stated in Assumptions
 - [ ] No logic is duplicated to avoid a dependency — use `depends_on` instead
 - [ ] The tech stack section reflects what was actually found in the repo, not guessed
 - [ ] Assumptions cover any ambiguity that would block a developer from starting
@@ -328,6 +333,9 @@ Before outputting the plan, verify:
 - [ ] All UI tasks enforce `data-testid` attributes on interactive and display elements
 - [ ] Existing test files that conflict with the planned changes are listed for deletion in the appropriate ticket
 - [ ] Commands embedded in task prose (including proposed `package.json` `scripts` entries) have been audited by the Step 7 review subagent against the detected stack
+- [ ] If new dependencies are introduced, the first task of the root ticket installs them — no later task or child ticket runs `npm install` for the same packages
+- [ ] CI/CD and deployment pipelines (GitHub Actions, hosting config) are in their own ticket, not buried inside a UI or backend ticket
+- [ ] For UI-heavy features, a design foundation ticket establishes the shared visual layer (theme, global styles, fonts, app shell) before section-specific UI tickets
 
 ---
 

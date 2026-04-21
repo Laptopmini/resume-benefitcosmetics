@@ -24,7 +24,8 @@ PR_SUMMARY_FILE=".maestro.summary.md"
 
 # Models
 
-export STAFF_DEVELOPER_MODEL="opus" # Planning & Backpressure
+export PROJECT_MANAGER_MODEL="claude-opus-4-7" # Planning
+export STAFF_DEVELOPER_MODEL="claude-opus-4-6" # Backpressure
 export SENIOR_DEVELOPER_MODEL="qwen/qwen3.5-35b-a3b" # Ticket Breakdown
 export MIDLEVEL_DEVELOPER_MODEL="google/gemma-4-26b-a4b" # PR Descriptions
 export JUNIOR_DEVELOPER_MODEL="google/gemma-4-26b-a4b" # Implementation
@@ -162,7 +163,7 @@ while $MISSING_BLUEPRINT; do
     else
         log INFO "Generating implementation plan..."
         # FIXME: Change this into a pure prompt rather than a skill
-        TREE_LEVELS=$(prompt "/blueprint $*" --allowedTools "Read,Glob,Grep,Write($BLUEPRINT_FILE),Edit($BLUEPRINT_FILE),Agent" --model "$STAFF_DEVELOPER_MODEL")
+        TREE_LEVELS=$(prompt "/blueprint $*" --allowedTools "Read,Glob,Grep,Write($BLUEPRINT_FILE),Edit($BLUEPRINT_FILE),Agent" --model "$PROJECT_MANAGER_MODEL")
 
         # FIXME: Should tree levels be written by the skill using a script to avoid divergence?
 

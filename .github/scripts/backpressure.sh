@@ -65,6 +65,6 @@ $LEDGER
 $PRD
 "
 
-prompt "$AGENT_PROMPT" --allowedTools "Read,Write,Edit,Glob,Grep,Bash(npm run lint),Bash(npm run check-types),Bash(npm test),Bash(npx jest:*),Bash(npx playwright:*),Bash(npx tsc:*),Bash(npx biome:*)"  --model opus
+prompt "$AGENT_PROMPT" --allowedTools "Read,Write,Edit,Glob,Grep,Bash(npm run lint),Bash(npm run check-types),Bash(npm test),Bash(npx jest:*),Bash(npx playwright:*),Bash(npx tsc:*),Bash(npx biome:*)"  --model "${STAFF_DEVELOPER_MODEL:-claude-opus-4-6}"
 
 log INFO "Backpressure prompt completed."

@@ -134,7 +134,7 @@ $PRD_CONTENT
     OUTPUT=$(prompt "$AGENT_PROMPT" \
         --allowedTools "Read,Edit,Write,Glob,Grep,Bash" \
         --disallowedTools "Bash(git:*),Bash(npm test*),Bash(npm run test*),Bash($TYPE_CHECK_CMD*),Bash(npx jest*),Bash(npx playwright*),Bash(npx tsc*)" \
-        --model "${JUNIOR_DEVELOPER_MODEL:-sonnet}")
+        --model "${JUNIOR_DEVELOPER_MODEL:-claude-sonnet-4-6}")
     PROMPT_EXIT=$?
     set -e
 
