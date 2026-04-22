@@ -1,5 +1,8 @@
 # .aignore
 
+# Environment variables
+.env
+
 # Ralph files
 .ralph.lock
 .ralph.log

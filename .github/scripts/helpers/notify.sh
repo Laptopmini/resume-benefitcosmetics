@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 
 notify() {
-    # Get the topic from the .env file
-    eval "local $(grep '^NTFY_TOPIC=' .env)"
-
     # Check if the topic is set
     if [ -z "$NTFY_TOPIC" ]; then
         log INFO "Notification push ignored. Set NTFY_TOPIC in .env file to enable notifications." >&2

@@ -29,6 +29,13 @@ npm install -D @playwright/test jest @types/jest @biomejs/biome@2.4.8 typescript
 # Install the playwright dependencies
 npx playwright install chromium
 
+# Create .env file
+cat <<EOF > .env
+# NTFY_TOPIC=<provide-topic-here-and-uncomment-to-receive-notifications>
+MINIMAX_API_KEY=<insert-key-here>
+EOF
+read -n 1 -s -r -p "Created .env file! Please set the value for MINIMAX_API_KEY. Press any key when finished..."$'\n' < /dev/tty;
+
 # Move the init PRD to the root
 mv docs/initialize-ralph-node/PRD.md PRD.md
 

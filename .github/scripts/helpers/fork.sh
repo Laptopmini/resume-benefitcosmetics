@@ -20,6 +20,7 @@ NAMESPACE="Laptopmini"
 UPSTREAM=$(git remote get-url origin)
 BARE_CLONE="temp-repo-bare-clone"
 NEW_REPO="https://github.com/$NAMESPACE/$NAME.git"
+CURRENT_DIR=$(pwd)
 
 log INFO "Cloning $UPSTREAM as $NAME..."
 
@@ -54,6 +55,9 @@ git remote add upstream "$UPSTREAM"
 if command -v npm &>/dev/null && [ -f package.json ]; then
     npm pkg set name="$NAME" || true
 fi
+
+# Copy the .env file
+cp -f "$CURRENT_DIR/.env" ".env"
 
 if command -v code &>/dev/null; then
   # Open the project in VS Code
