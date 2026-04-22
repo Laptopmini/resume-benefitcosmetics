@@ -28,12 +28,48 @@ export PROJECT_MANAGER_MODEL="claude-opus-4-7" # Planning
 export STAFF_DEVELOPER_MODEL="claude-opus-4-6" # Backpressure
 export SENIOR_DEVELOPER_MODEL="qwen/qwen3.5-35b-a3b" # Ticket Breakdown
 export MIDLEVEL_DEVELOPER_MODEL="google/gemma-4-26b-a4b" # PR Descriptions
-export JUNIOR_DEVELOPER_MODEL="google/gemma-4-26b-a4b" # Implementation
+export JUNIOR_DEVELOPER_MODEL="minimax/MiniMax-M2.7" # Implementation
 
 # Variables
 
 export REPO_SLUG=$(bash .github/scripts/helpers/repo-slug.sh)
 export PR_SUMMARY_FILE
+
+# Environment variables
+
+MISSING_MINIMAX_API_KEY=false
+
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs)
+    log INFO "Loaded .env file."
+
+    if [[ -z "$MINIMAX_API_KEY" || "$MINIMAX_API_KEY" == "<insert-key-here>" ]]; then
+        MISSING_MINIMAX_API_KEY=true
+    fi
+else
+    MODEL_VARS=(
+        "PROJECT_MANAGER_MODEL"
+        "STAFF_DEVELOPER_MODEL"
+        "SENIOR_DEVELOPER_MODEL"
+        "MIDLEVEL_DEVELOPER_MODEL"
+        "JUNIOR_DEVELOPER_MODEL"
+    )
+
+    for var_name in "${MODEL_VARS[@]}"; do
+        value="${!var_name}"
+
+        if [[ "$value" == minimax/* ]]; then
+            MISSING_MINIMAX_API_KEY=true
+            break
+        fi
+    done
+    log INFO "No .env file found."
+fi
+
+if [[ "$MISSING_MINIMAX_API_KEY" == "true" ]]; then
+    log ERROR "Missing MINIMAX_API_KEY in .env file. Please set it to your API key."
+    exit 1
+fi
 
 # Functions
 

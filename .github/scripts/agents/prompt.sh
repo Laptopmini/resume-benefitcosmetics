@@ -77,12 +77,23 @@ prompt() {
     done
 
     if [[ "$MODEL" != claude-* ]]; then
-        bash .github/scripts/agents/load-model.sh "$MODEL"
+        if [[ "$MODEL" != minimax/* ]]; then
+            bash .github/scripts/agents/load-model.sh "$MODEL"
+        fi
 
         if [[ "$CLI" == "claude" ]]; then
             # Determine the max context window size for the model
-            local MAX_CONTEXT_WINDOW=4000
+            local MAX_CONTEXT_WINDOW=20000
             case "$MODEL" in
+                qwen/qwen2.5-coder-32b)
+                    MAX_CONTEXT_WINDOW=32768
+                    ;;
+                deepseek-r1-distill-qwen-32b)
+                    MAX_CONTEXT_WINDOW=131072
+                    ;;
+                google/gemma-4-31b)
+                    MAX_CONTEXT_WINDOW=60000
+                    ;;
                 qwen/qwen3-coder-30b)
                     MAX_CONTEXT_WINDOW=180000
                     ;;
@@ -92,24 +103,15 @@ prompt() {
                 google/gemma-4-26b-a4b)
                     MAX_CONTEXT_WINDOW=120000
                     ;;
+                minimax/MiniMax-M2.7)
+                    MAX_CONTEXT_WINDOW=196000
+                    ;;
                 *)
                     log WARN "Model $MODEL does not have a max context window size! Using default of $MAX_CONTEXT_WINDOW." >&2
                     ;;
             esac
 
-            # Setup Claude Code environment variables for LM Studio
             LOCAL_ENV=(
-                ANTHROPIC_BASE_URL="http://localhost:1234"
-                ANTHROPIC_AUTH_TOKEN="lmstudio"
-                # Force all Claude Code model selections (Opus, Sonnet, Haiku) to route through local model
-                ANTHROPIC_MODEL="$MODEL"
-                ANTHROPIC_CUSTOM_MODEL_OPTION="$MODEL"
-                ANTHROPIC_CUSTOM_MODEL_OPTION_NAME="LM Studio ($MODEL)"
-                ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION="The local LM Studio server running the model $MODEL locally."
-                ANTHROPIC_DEFAULT_OPUS_MODEL="$MODEL"
-                ANTHROPIC_DEFAULT_SONNET_MODEL="$MODEL"
-                ANTHROPIC_DEFAULT_HAIKU_MODEL="$MODEL"
-                CLAUDE_CODE_SUBAGENT_MODEL="$MODEL"
                 # Extend shell command timeouts for long-running operations (40-42 minutes)
                 BASH_DEFAULT_TIMEOUT_MS="2400000" 
                 BASH_MAX_TIMEOUT_MS="$BASH_MAX_TIMEOUT"
@@ -124,28 +126,64 @@ prompt() {
                 # Disable Claude features not compatible with open-source models
                 CLAUDE_CODE_DISABLE_1M_CONTEXT="1"
                 CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING="1"
+                CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1"
             )
-        else
-            local OPENCODE_CUSTOM_PROVIDER="lmstudio"
-            # FIXME: If MiniMax-M2.7, use `minimax` provider
 
+            if [[ "$MODEL" == minimax/* ]]; then
+                local MINIMAX_MODEL="${MODEL#minimax/}"
+                LOCAL_ENV+=(
+                    ANTHROPIC_BASE_URL="https://api.minimax.io/anthropic"
+                    ANTHROPIC_AUTH_TOKEN="$MINIMAX_API_KEY"
+                    ANTHROPIC_MODEL="$MINIMAX_MODEL"
+                    ANTHROPIC_DEFAULT_OPUS_MODEL="$MINIMAX_MODEL"
+                    ANTHROPIC_DEFAULT_SONNET_MODEL="$MINIMAX_MODEL"
+                    ANTHROPIC_DEFAULT_HAIKU_MODEL="$MINIMAX_MODEL"
+                    ANTHROPIC_SMALL_FAST_MODEL="$MINIMAX_MODEL"
+                    CLAUDE_CODE_SUBAGENT_MODEL="$MINIMAX_MODEL"
+                )
+            else
+                LOCAL_ENV+=(
+                    ANTHROPIC_BASE_URL="http://localhost:1234"
+                    ANTHROPIC_AUTH_TOKEN="lmstudio"
+                    ANTHROPIC_MODEL="$MODEL"
+                    ANTHROPIC_CUSTOM_MODEL_OPTION="$MODEL"
+                    ANTHROPIC_CUSTOM_MODEL_OPTION_NAME="LM Studio ($MODEL)"
+                    ANTHROPIC_CUSTOM_MODEL_OPTION_DESCRIPTION="The local LM Studio server running the model $MODEL locally."
+                    ANTHROPIC_DEFAULT_OPUS_MODEL="$MODEL"
+                    ANTHROPIC_DEFAULT_SONNET_MODEL="$MODEL"
+                    ANTHROPIC_DEFAULT_HAIKU_MODEL="$MODEL"
+                    ANTHROPIC_SMALL_FAST_MODEL="$MODEL"
+                    CLAUDE_CODE_SUBAGENT_MODEL="$MODEL"
+                )
+            fi
+        else
             LOCAL_ENV=(
                 OPENCODE_PERMISSION="$(get_opencode_permissions "$ALLOWED" "$DISALLOWED")" # Inlined json permissions config
-                OPENCODE_CUSTOM_PROVIDER="$OPENCODE_CUSTOM_PROVIDER"
-                OPENCODE_CUSTOM_PROVIDER_NAME="LM Studio (local)"
-                OPENCODE_CUSTOM_MODEL="$MODEL"
-                OPENCODE_CUSTOM_MODEL_NAME="$MODEL"
-                OPENCODE_MODEL="$OPENCODE_CUSTOM_PROVIDER/$MODEL"
                 OPENCODE_AUTO_SHARE=false # Disable automatically shared sessions
                 OPENCODE_DISABLE_AUTOUPDATE=true # Disable automatic update checks
                 OPENCODE_DISABLE_MOUSE=true # Disable mouse support
                 OPENCODE_DISABLE_CLAUDE_CODE_SKILLS=$([[ "$AGENT_PROMPT" = /* ]] && echo false || echo true) # Disable Claude Code skills if not using command
-                OPENCODE_DISABLE_LSP_DOWNLOAD=true # Disable LSP download
                 OPENCODE_DISABLE_CLAUDE_CODE_PROMPT=true # Disable reading .CLAUDE.md file
                 # Experimental settings
                 OPENCODE_EXPERIMENTAL_BASH_DEFAULT_TIMEOUT_MS=$BASH_MAX_TIMEOUT # Increase bash timeout
                 # OPENCODE_EXPERIMENTAL_PLAN_MODE=true # Enable experimental plan mode
             )
+
+            if [[ "$MODEL" == minimax/* ]]; then
+                LOCAL_ENV+=(
+                    OPENCODE_MODEL="$MODEL"
+                )
+            else
+                local OPENCODE_CUSTOM_PROVIDER="lmstudio"
+                LOCAL_ENV+=(
+                    OPENCODE_CUSTOM_PROVIDER="$OPENCODE_CUSTOM_PROVIDER"
+                    OPENCODE_CUSTOM_PROVIDER_NAME="LM Studio (local)"
+                    OPENCODE_CUSTOM_MODEL="$MODEL"
+                    OPENCODE_CUSTOM_MODEL_NAME="$MODEL"
+                    OPENCODE_MODEL="$OPENCODE_CUSTOM_PROVIDER/$MODEL"
+                )
+            fi
+
         fi
     else
         # Always use Claude CLI with Anthropic models
