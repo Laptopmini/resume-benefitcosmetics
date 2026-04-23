@@ -22,6 +22,11 @@ BARE_CLONE="temp-repo-bare-clone"
 NEW_REPO="https://github.com/$NAMESPACE/$NAME.git"
 CURRENT_DIR=$(pwd)
 
+if [ -z "$1" ]; then
+    log ERROR "No new repo name provided. Aborting."
+    exit 1
+fi
+
 log INFO "Cloning $UPSTREAM as $NAME..."
 
 # Navigate to parent directory
