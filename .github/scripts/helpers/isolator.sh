@@ -18,6 +18,8 @@ isolate_backpressure() {
     # Move "tests/" to ".maestro.backpressure/tests/"
     mkdir -p "$BACKPRESSURE_BACKUP_FOLDER"
     mv -f "$BACKPRESSURE_FOLDER" "$BACKPRESSURE_BACKUP_FOLDER/$BACKPRESSURE_FOLDER"
+
+    log INFO "Isolated backpressure!"
 }
 
 # Restore backpressure to its original location so that the agents can read them
