@@ -52,7 +52,7 @@ Example: "Add a banner at the top" → `add-banner-top`
 |-----|-------------|
 | `[logic]` | `npx jest tests/unit/<filename>.test.ts` |
 | `[ui]` | `npx playwright test tests/e2e/<filename>.spec.ts` |
-| `[infra]` | `npx tsc --noEmit` or `npx biome check` for config validation; `bash scripts/<filename>.sh` otherwise |
+| `[infra]` | `npx tsc --noEmit` or `npm run lint` for config validation; `bash tests/scripts/<filename>.sh` otherwise |
 
 ---
 

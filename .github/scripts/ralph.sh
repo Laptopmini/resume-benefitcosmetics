@@ -9,6 +9,7 @@ set -euo pipefail
 
 source .github/scripts/helpers/log.sh
 source .github/scripts/agents/prompt.sh
+source .github/scripts/helpers/isolator.sh
 
 # Settings
 
@@ -26,7 +27,7 @@ if [ -e "$LOCK_FILE" ]; then
 fi
 
 touch "$LOCK_FILE"
-trap "rm -f $LOCK_FILE" EXIT
+trap "rm -f $LOCK_FILE && restore_backpressure" EXIT
 trap 'exit 130' INT HUP TERM
 
 if [[ -z "${1:-}" ]]; then
@@ -50,10 +51,13 @@ TOTAL_LOOPS=0
 PREVIOUS_TASK_VALIDATION=()
 declare -A PREVIOUS_TASK_VALIDATION_LOOKUP
 
+isolate_backpressure
+
 while true; do
     log INFO "Parsing Active Task & Target Test..."
 
     CURRENT_TASK=$(grep -m 1 "^\s*- \[ \]" PRD.md || true)
+    export CURRENT_TASK
 
     if [ -z "$CURRENT_TASK" ]; then
         log SUCCESS "🎉 No incomplete tasks found in PRD.md. Cleaning up..."
@@ -107,9 +111,9 @@ while true; do
     RALPH_PROMPT=$(cat .github/prompts/ralph.md 2>/dev/null || echo "You are an autonomous developer.")
     LEDGER_CONTEXT=$(tail -n 5 .agent-ledger.jsonl 2>/dev/null || echo "No history.")
     MEMORY_CONTEXT=$(cat MEMORY.md 2>/dev/null || echo "Scratchpad empty.")
-    PRD_CONTENT=$(awk -v task="$CURRENT_TASK" '
+    PRD_CONTENT=$(awk '
         { print }
-        $0 == task { exit }
+        ENVIRON["CURRENT_TASK"] == $0 { exit }
     ' PRD.md)
 
     AGENT_PROMPT="
@@ -129,6 +133,8 @@ $PRD_CONTENT
 "
 
     ERROR_FEEDBACK=""
+
+    restore_backpressure "$TARGETED_TEST"
 
     set +e
     OUTPUT=$(prompt "$AGENT_PROMPT" \
@@ -179,7 +185,7 @@ $PRD_CONTENT
     UNCHECKED_COUNT=$(grep -c "^\s*- \[ \]" PRD.md || true)
 
     # Make sure to lint unless biome is already being used
-    if [[ "$TARGETED_TEST" != "npx biome"* ]]; then
+    if [[ "$TARGETED_TEST" != "npm run lint"* ]]; then
         TASK_VALIDATION+=("npm run lint")
     fi
 
@@ -202,6 +208,9 @@ $PRD_CONTENT
             COMBINED_VALIDATION+=("$E2E_TEST_CMD")
             PREVIOUS_TASK_VALIDATION_LOOKUP[$E2E_TEST_CMD]=1
         fi
+
+        # Restore all backpressure
+        restore_backpressure
     elif [[ ${#PREVIOUS_TASK_VALIDATION[@]} -gt 0 ]]; then
         # Make sure previous tasks are still passing
         COMBINED_VALIDATION+=("${PREVIOUS_TASK_VALIDATION[@]}")
@@ -243,8 +252,8 @@ $PRD_CONTENT
             log INFO "Ledger Entry Added:\n$PROPOSED_LEDGER"
         fi
 
-        awk -v task="$CURRENT_TASK" '{
-            if (!done && $0 == task) {
+        awk '{
+            if (!done && $0 == ENVIRON["CURRENT_TASK"]) {
                 sub(/- \[ \]/, "- [x]")
                 done = 1
             }

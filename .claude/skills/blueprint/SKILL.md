@@ -347,8 +347,10 @@ Before outputting the plan, verify:
 
 **Task nature tags** indicate the type of work:
 - `[logic]` — business logic, API routes, data models, state management, utilities
-- `[ui]` — components, pages, layouts, styling, user interactions
-- `[infra]` — configuration, environment setup, dependency installation, CI/CD
+- `[ui]` — components, pages, layouts, styling, user interactions that render in a browser
+- `[infra]` — configuration, environment setup, dependency installation, CI/CD, standalone style/CSS files (e.g. global stylesheets, design tokens, theme variables) that are not yet consumed by a rendered page
+
+A standalone CSS or stylesheet task (e.g. "create `globals.css` with design tokens") must be tagged `[infra]`, not `[ui]`. The `[ui]` tag triggers E2E (Playwright) testing, which requires a rendered page. A CSS file that no component imports yet cannot be validated by Playwright — use `[infra]` so the downstream test command falls back to linting or type-checking.
 
 Avoid vague tasks like "implement X" — each task should describe exactly what to build or change. These tasks will be consumed by downstream tooling, so they should be as specific as possible.
 

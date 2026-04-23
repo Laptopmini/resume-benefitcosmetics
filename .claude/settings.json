@@ -45,7 +45,9 @@
       "Read(.maestro.claude.tmp)",
       "Write(.maestro.claude.tmp)",
       "Edit(.maestro.claude.tmp)",
-      "Bash(* .maestro.claude.tmp*)"
+      "Bash(* .maestro.claude.tmp*)",
+      "Glob(.maestro.claude.tmp)",
+      "Grep(.maestro.claude.tmp)"
     ]
   }
 }
