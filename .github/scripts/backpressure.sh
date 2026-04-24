@@ -23,10 +23,14 @@ You are a TEST AUTHOR. You write ONLY test files and validation scripts. You do 
 Your job: for each unchecked task in the PRD below, write a test or validation script that will FAIL until that task is correctly implemented by a future agent.
 
 Read package.json before generating tests to understand which dependencies and test runners are available.
+If your tests require packages not present in devDependencies (e.g., jest-environment-jsdom for React component tests), install them first with \`npm install -D <package>\`. If your tests require a different Jest environment or setup, update jest.config.mjs before writing the test files.
 
 You are running in non-interactive mode, if you have a question, pick the solution which does not break an existing constraint.
 
-- DO NOT create application source files, configuration files, or install/modify dependencies.
+- DO NOT create or modify application source files (src/, app/, pages/, components/, lib/, styles/).
+- DO NOT modify non-test configuration files (next.config.mjs, tsconfig.json, biome.json, postcss.config.mjs, tailwind.config.*, .env*).
+- You MAY install devDependencies needed for your tests using \`npm install -D <package>\`. Only install test-related packages (e.g., jest-environment-jsdom, @testing-library/jest-dom). Do NOT install application dependencies.
+- You MAY modify \`jest.config.mjs\` when your tests require a different test environment or setup files. Keep changes minimal — only add what your tests need (e.g., testEnvironment, setupFilesAfterSetup, projects). Do NOT remove or alter existing configuration that other tests depend on.
 - DO NOT implement any task. If a task says \"Install X\" or \"Create config Y\", write a test that asserts X is installed or Y exists — do not perform the action itself.
 - Only write test files (.test.ts, .spec.ts) and validation scripts (tests/scripts/*.sh).
 - Treat each checkbox item as a single atomic unit of work.
@@ -67,6 +71,6 @@ $LEDGER
 $PRD
 "
 
-prompt "$AGENT_PROMPT" --allowedTools "Read,Write,Edit,Glob,Grep,Bash(npm run lint),Bash(npm run check-types),Bash(npm test),Bash(npx jest:*),Bash(npx tsc:*),Bash(npx biome:*)"  --model "${STAFF_DEVELOPER_MODEL:-claude-opus-4-6}"
+prompt "$AGENT_PROMPT" --cli claude --allowedTools "Read,Write,Edit,Glob,Grep,Bash(npm run lint),Bash(npm run check-types),Bash(npm test),Bash(npx jest:*),Bash(npx tsc:*),Bash(npx biome:*),Bash(npm install -D *)"  --model "${STAFF_DEVELOPER_MODEL:-claude-opus-4-6}"
 
 log INFO "Backpressure prompt completed."
