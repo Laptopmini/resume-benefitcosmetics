@@ -29,7 +29,7 @@ PR_SUMMARY_FILE=".maestro.summary.md"
 # Models
 
 export PROJECT_MANAGER_MODEL="claude-opus-4-7" # Planning
-export STAFF_DEVELOPER_MODEL="claude-opus-4-6" # Backpressure
+export STAFF_DEVELOPER_MODEL="minimax/MiniMax-M2.7" # Backpressure
 export SENIOR_DEVELOPER_MODEL="qwen/qwen3.5-35b-a3b" # Ticket Breakdown
 export MIDLEVEL_DEVELOPER_MODEL="google/gemma-4-26b-a4b" # PR Descriptions
 export JUNIOR_DEVELOPER_MODEL="minimax/MiniMax-M2.7" # Implementation
