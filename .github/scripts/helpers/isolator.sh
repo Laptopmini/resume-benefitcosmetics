@@ -16,9 +16,11 @@ isolate_backpressure() {
         return 0
     fi
 
-    # Move "tests/" to ".maestro.backpressure/tests/"
-    mkdir -p "$BACKPRESSURE_BACKUP_FOLDER"
-    mv -f "$BACKPRESSURE_FOLDER" "$BACKPRESSURE_BACKUP_FOLDER/$BACKPRESSURE_FOLDER"
+    # Move e2e, scripts, and unit folders to ".maestro.backpressure/tests/"
+    mkdir -p "$BACKPRESSURE_BACKUP_FOLDER/$BACKPRESSURE_FOLDER"
+    [ -e "$BACKPRESSURE_FOLDER/e2e" ] && mv -f "$BACKPRESSURE_FOLDER/e2e" "$BACKPRESSURE_BACKUP_FOLDER/$BACKPRESSURE_FOLDER/e2e"
+    [ -e "$BACKPRESSURE_FOLDER/scripts" ] && mv -f "$BACKPRESSURE_FOLDER/scripts" "$BACKPRESSURE_BACKUP_FOLDER/$BACKPRESSURE_FOLDER/scripts"
+    [ -e "$BACKPRESSURE_FOLDER/unit" ] && mv -f "$BACKPRESSURE_FOLDER/unit" "$BACKPRESSURE_BACKUP_FOLDER/$BACKPRESSURE_FOLDER/unit"
 
     log INFO "Isolated backpressure!"
 }

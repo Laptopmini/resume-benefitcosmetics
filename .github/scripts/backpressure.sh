@@ -43,6 +43,17 @@ You are running in non-interactive mode, if you have a question, pick the soluti
   - The test runner specified in the annotation determines the test framework and file type:
     - \`npx jest tests/unit/foo.test.ts\` → Jest unit test
     - \`bash tests/scripts/foo.sh\` → shell validation script
+  - Shell validation scripts MUST source the shared helper library (tests/helpers/assert.sh) and use its functions:
+    - Begin with: \`source \"\$(cd \"\$(dirname \"\$0\")\" && pwd)/../helpers/assert.sh\"\`
+    - End with: \`report_results\`
+    - Available helpers:
+      - \`assert \"desc\" command [args...]\` — run any command, pass if exit 0
+      - \`assert_grep \"desc\" \"pattern\" \"filepath\"\` — fixed-string grep in file
+      - \`assert_grep_regex \"desc\" \"pattern\" \"filepath\"\` — regex grep in file
+      - \`assert_json \"desc\" \"js_expression\" \"filepath\"\` — JSON query via node; object is bound to \`_\`
+        Example: \`assert_json \"has react\" \"_.dependencies.react\" \"./package.json\"\`
+    - If none of the provided helpers fit your assertion, you MAY define a local helper in the script. Local helpers MUST record results by calling \`_pass \"desc\"\` and \`_fail \"desc\"\` (provided by the library). Do NOT manipulate PASS/FAIL counters directly or use \`((var++))\`.
+    - Do NOT redefine PASS, FAIL, \`_pass\`, \`_fail\`, or \`report_results\`
 - The test file's own extension is chosen by the runner and the subject's language:
     - TypeScript subject (.ts, .tsx) → .test.ts / .spec.ts
     - JavaScript subject (.js, .jsx, .mjs, .cjs) → .test.js / .spec.js
