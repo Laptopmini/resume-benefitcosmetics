@@ -68,6 +68,7 @@ Given a ticket section like this (input):
     > **Tasks:**
     > 1. [code] Create `src/timer-logic.ts` with pure functions: `formatTime(totalSeconds: number): string` (returns "MM:SS") and `tick(remainingSeconds: number): number` (decrements by 1, floors at 0), and a constant `POMODORO_DURATION_SECONDS = 1500`.
     > 2. [code] Create `tests/unit/timer-logic.test.ts` — test `formatTime` (25:00, 00:00, 09:59 edge cases), test `tick` (decrements, does not go below 0), test duration constant equals 1500.
+    > 3. [infra] Add a `tsconfig.json` at the project root with `strict: true`, `module: "ESNext"`, and `outDir: "dist"`.
 
 …the Write tool call's `content` argument should be the following text (shown indented here for illustration — do NOT indent it in the actual file, and do NOT wrap it in backticks):
 
@@ -77,6 +78,7 @@ Given a ticket section like this (input):
 
     - [ ] Create timer logic module. Create `src/timer-logic.ts` with pure functions: `formatTime(totalSeconds: number): string` (returns "MM:SS") and `tick(remainingSeconds: number): number` (decrements by 1, floors at 0), and a constant `POMODORO_DURATION_SECONDS = 1500`. `[test: npx jest tests/unit/create-timer-logic-module.test.ts]`
     - [ ] Create timer logic unit tests. Create `tests/unit/timer-logic.test.ts` — test `formatTime` (25:00, 00:00, 09:59 edge cases), test `tick` (decrements, does not go below 0), test duration constant equals 1500. `[test: npx jest tests/unit/create-timer-logic-unit-tests.test.ts]`
+    - [ ] Add TypeScript config. Add a `tsconfig.json` at the project root with `strict: true`, `module: "ESNext"`, and `outDir: "dist"`. `[test: bash tests/scripts/add-typescript-config.sh]`
 
 ---
 
