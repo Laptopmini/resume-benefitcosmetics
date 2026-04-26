@@ -14,9 +14,12 @@ const config = {
       },
     ],
   },
-  testEnvironment: "node",
+  testEnvironment: "jest-environment-jsdom",
   testMatch: ["<rootDir>/tests/unit/**/*.test.{ts,tsx}"],
   roots: ["<rootDir>/tests"],
+  moduleNameMapper: {
+    "^@/(.*)$": "<rootDir>/$1",
+  },
 };
 
 export default config;
