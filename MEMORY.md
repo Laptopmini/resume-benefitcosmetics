@@ -1,1 +1,1 @@
-Created src/lib/basePath.ts with BASE_PATH constant and withBasePath helper function.
+Test was importing profile, skills, experience, education directly but they were nested inside the resume object. Added top-level re-exports: `export const profile = resume.profile;` and similarly for skills, experience, and education. Data was already correct in resume.md transcription.
