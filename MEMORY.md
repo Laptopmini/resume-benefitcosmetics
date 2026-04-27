@@ -1,1 +1,1 @@
-Deleted src/index.ts — file existed and had no imports from any .ts/.tsx files. Confirmed deletion successful.
+Created next.config.mjs with required Next.js static export settings: output:'export', basePath, assetPrefix, images unoptimized, trailingSlash, reactStrictMode.
