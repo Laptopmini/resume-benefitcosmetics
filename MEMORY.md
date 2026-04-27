@@ -1,1 +1,1 @@
-Fixed jest.config.mjs moduleNameMapper to add "^@/src/(.*)$" entry before the existing "@" catch-all, so that paths starting with @/src/ resolve correctly to src/ directory.
+Created src/components/Profile.tsx with framer-motion motion.p that uses whileInView, initial opacity/y, viewport once:true with -100px margin, and 0.6s duration. Renders resume.profile.summary with correct typography classes.
