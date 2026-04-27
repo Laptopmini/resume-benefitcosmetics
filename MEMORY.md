@@ -1,1 +1,1 @@
-Jest failed on CSS @import syntax in globals.css. Fixed by creating tests/__mocks__/globals.css.js mock returning empty module.exports, and adding CSS moduleNameMapper to jest.config.mjs mapping .css files to the mock.
+Fixed lint errors: changed "/" + path concatenation to template literal in basePath.ts, and added type="button" to Nav.tsx button element.
