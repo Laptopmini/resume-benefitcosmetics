@@ -300,7 +300,7 @@ while IFS= read -r LEVEL <&3; do
             exit 1
         fi
 
-        BRANCHES+=$(printf "%s\n" "$PRD_BRANCH")
+        BRANCHES+="$PRD_BRANCH"$'\n'
     done
     log SUCCESS "Finished creating branches and PRDs for current level!"
 
