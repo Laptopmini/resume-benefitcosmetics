@@ -1,1 +1,1 @@
-Created next.config.mjs with required Next.js static export settings: output:'export', basePath, assetPrefix, images unoptimized, trailingSlash, reactStrictMode.
+Created postcss.config.mjs with '@tailwindcss/postcss' plugin export per task spec.

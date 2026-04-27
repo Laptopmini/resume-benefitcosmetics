@@ -6,3 +6,4 @@
 {"task": "Append .next/, out/, and next-env.d.ts to .gitignore", "files_mutated": [".gitignore"], "summary": "Appended next-env.d.ts to .gitignore. .next/ and out/ were already present."}
 {"task": "Delete src/index.ts", "files_mutated": ["src/index.ts"], "summary": "Deleted src/index.ts. Verified no imports reference it."}
 {"task": "Create next.config.mjs", "files_mutated": ["next.config.mjs"], "summary": "Created next.config.mjs with output:export, basePath:/ralph-node-resume, assetPrefix:/ralph-node-resume, images.unoptimized:true, trailingSlash:true, reactStrictMode:true."}
+{"task": "Create postcss.config.mjs", "files_mutated": ["postcss.config.mjs"], "summary": "Created postcss.config.mjs exporting plugins object with @tailwindcss/postcss."}
