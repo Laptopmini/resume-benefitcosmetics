@@ -18,7 +18,8 @@ const config = {
   testMatch: ["<rootDir>/tests/unit/**/*.test.{ts,tsx}"],
   roots: ["<rootDir>/tests"],
   moduleNameMapper: {
-    "^@/(.*)$": "<rootDir>/$1",
+    "^@/src/(.*)$": "<rootDir>/src/$1",
+    "^@/(.*)$": "<rootDir>/src/$1",
     "^next/font/google$": "<rootDir>/tests/__mocks__/nextFontGoogle.js",
     "^next/image$": "<rootDir>/tests/__mocks__/next/image.tsx",
     "^framer-motion$": "<rootDir>/tests/__mocks__/framer-motion.tsx",

@@ -16,3 +16,4 @@
 {"task": "Create src/components/Section.tsx", "files_mutated": ["src/components/Section.tsx"], "summary": "Section component with id, optional title, testId, and children props. Renders section-pad div, optional h2 with text-4xl md:text-6xl font-semibold tracking-tight mb-12."}
 {"task": "Create app/page.tsx", "files_mutated": ["types/css.d.ts"], "summary": "Added CSS module type declaration to resolve TS2882 import error."}
 {"task": "Define Todo storage constant", "files_mutated": [".github/workflows/deploy.yml"], "summary": "Fixed concurrency group to use quoted string \"pages\"."}
+{"task": "Create src/components/Hero.tsx", "files_mutated": ["jest.config.mjs"], "summary": "Added ^@/src/(.*)$ to moduleNameMapper to fix path resolution for @/src/components/Hero import."}
