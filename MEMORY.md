@@ -1,1 +1,1 @@
-Created src/components/Profile.tsx with framer-motion motion.p that uses whileInView, initial opacity/y, viewport once:true with -100px margin, and 0.6s duration. Renders resume.profile.summary with correct typography classes.
+Created src/components/Skills.tsx with four motion.div groups for each skill category. Each group has an h3 label and flex-wrap chip row with motion.span items. Used slugify to convert category names to lowercase (frontend, ai, infra, backend). Chips animate with staggered delay based on index.
