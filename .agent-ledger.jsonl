@@ -19,3 +19,4 @@
 {"task": "Create src/components/Hero.tsx", "files_mutated": ["jest.config.mjs"], "summary": "Added ^@/src/(.*)$ to moduleNameMapper to fix path resolution for @/src/components/Hero import."}
 {"task": "Create src/components/Profile.tsx", "files_mutated": ["src/components/Profile.tsx"], "summary": "Profile component with motion.p, whileInView animation, resume.profile.summary content."}
 {"task": "Create src/components/Skills.tsx", "files_mutated": ["src/components/Skills.tsx"], "summary": "Skills component rendering four category groups with motion animations and pill-styled chips."}
+{"task": "Create src/components/Experience.tsx", "files_mutated": ["src/components/Experience.tsx"], "summary": "Experience component with timeline rendering resume.experience entries with motion.li animations, bullets with strong labels, and tech stack chips."}
