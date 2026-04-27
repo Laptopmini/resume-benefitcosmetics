@@ -13,3 +13,4 @@
 {"task": "Create app/globals.css", "files_mutated": ["app/globals.css"], "summary": "Created globals.css with Tailwind v4 @import, @theme tokens, base resets, and .section-pad utility class."}
 {"task": "Fix Jest CSS import parsing error", "files_mutated": ["jest.config.mjs", "tests/__mocks__/globals.css.js"], "summary": "Added CSS mock and moduleNameMapper entry to jest.config.mjs to resolve @import syntax error."}
 {"task": "Create src/components/Nav.tsx", "files_mutated": ["src/lib/basePath.ts", "src/components/Nav.tsx"], "summary": "Fixed two lint errors: template literal in basePath.ts and type button in Nav.tsx."}
+{"task": "Create src/components/Section.tsx", "files_mutated": ["src/components/Section.tsx"], "summary": "Section component with id, optional title, testId, and children props. Renders section-pad div, optional h2 with text-4xl md:text-6xl font-semibold tracking-tight mb-12."}

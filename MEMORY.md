@@ -1,1 +1,1 @@
-Fixed lint errors: changed "/" + path concatenation to template literal in basePath.ts, and added type="button" to Nav.tsx button element.
+Created src/components/Section.tsx per test spec. Component accepts id, title?, testId, and children props. Renders section with section-pad class. Conditionally renders h2 with Apple-style typography when title is provided. Uses template literal for data-testid on heading.
