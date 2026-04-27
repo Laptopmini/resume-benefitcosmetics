@@ -4,7 +4,7 @@
 
 - [x] Install dependencies by running `npm install next@^15 react@^19 react-dom@^19 framer-motion@^11` and `npm install -D tailwindcss@^4 @tailwindcss/postcss@^4 postcss@^8 @types/react@^19 @types/react-dom@^19 @types/node@^22`. Then update `package.json` `scripts` to add `"dev": "next dev"`, `"build": "next build"`, `"start": "next start"`, and keep existing `test`, `lint`, `check-types` scripts intact. `[test: bash tests/scripts/install-dependencies.sh]`
 - [x] Update `tsconfig.json` to support Next.js: set `module` to `esnext`, `moduleResolution` to `bundler`, `jsx` to `preserve`, `noEmit` to `true`, add `lib: ["dom","dom.iterable","esnext"]`, add `plugins: [{ "name": "next" }]`, add `paths: { "@/*": ["./*"] }`, set `include` to `["next-env.d.ts","**/*.ts","**/*.tsx",".next/types/**/*.ts"]`, keep `exclude` as `["node_modules",".next","dist","out"]`. `[test: bash tests/scripts/update-tsconfig.sh]`
-- [ ] Append `.next/`, `out/`, and `next-env.d.ts` to `.gitignore`. `[test: bash tests/scripts/update-gitignore.sh]`
+- [x] Append `.next/`, `out/`, and `next-env.d.ts` to `.gitignore`. `[test: bash tests/scripts/update-gitignore.sh]`
 - [ ] Delete `src/index.ts` — verify the file no longer exists on disk and nothing imports it. `[test: bash tests/scripts/delete-old-entry-point.sh]`
 - [ ] Create `next.config.mjs` exporting a config with `output: 'export'`, `basePath: '/ralph-node-resume'`, `assetPrefix: '/ralph-node-resume'`, `images: { unoptimized: true }`, `trailingSlash: true`, and `reactStrictMode: true`. `[test: bash tests/scripts/create-nextjs-config.sh]`
 - [ ] Create `postcss.config.mjs` exporting `{ plugins: { '@tailwindcss/postcss': {} } }`. `[test: bash tests/scripts/create-postcss-config.sh]`

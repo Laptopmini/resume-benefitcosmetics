@@ -36,3 +36,4 @@ vite.config.ts.timestamp-*
 
 # E2E & Unit tests
 test-results/
+next-env.d.ts
