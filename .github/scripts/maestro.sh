@@ -7,10 +7,12 @@
 
 set -euo pipefail
 
+source .github/scripts/helpers/ask.sh
 source .github/scripts/helpers/log.sh
 source .github/scripts/agents/prompt.sh
 source .github/scripts/summarizer.sh
 source .github/scripts/helpers/notify.sh
+source .github/scripts/review.sh
 
 # FIXME: Leverage custom --systemPrompt so that directives can be stronger in Ralph and Repair agents (look at gains from prompt caching through iterations)
 
@@ -27,7 +29,7 @@ PR_SUMMARY_FILE=".maestro.summary.md"
 # Models
 
 export STAFF_DEVELOPER_MODEL="claude-opus-4-7" # Planning
-export SENIOR_DEVELOPER_MODEL="claude-opus-4-6" # Backpressure
+export SENIOR_DEVELOPER_MODEL="claude-opus-4-6" # Backpressure & Review
 export MIDLEVEL_DEVELOPER_MODEL="google/gemma-4-26b-a4b" # PR Descriptions
 export JUNIOR_DEVELOPER_MODEL="minimax/MiniMax-M2.7" # Implementation
 
@@ -73,8 +75,6 @@ if [[ "$MISSING_MINIMAX_API_KEY" == "true" ]]; then
 fi
 
 # Functions
-
-ask_continue() { read -n 1 -s -r -p "$*"$'\n' < /dev/tty; }
 
 view_pull_requests() {
     notify "Maestro is asking you to review the Pull Request(s)."
@@ -374,6 +374,9 @@ while IFS= read -r LEVEL <&3; do
     review_pull_requests "$IMPLEMENTATION_BRANCHES"
 done 3<<< "$TREE_LEVELS"
 
+log INFO "Running implementation review..."
+review_implementation "$FOLDER_NAME"
+
 log INFO "Archiving plan and log..."
 mv -f "$BLUEPRINT_FILE" "$FOLDER_NAME/plan.md"
 mv -f "$BLUEPRINT_LEVELS_FILE" "$FOLDER_NAME/plan.levels"
@@ -381,8 +384,6 @@ mv -f "$LOG_FILE" "$FOLDER_NAME/maestro.log"
 git add .
 git commit -m "chore(ai): Add Maestro log for $FOLDER_NAME"
 git push -u origin maestro
-
-# FIXME: Check if implementation is according to original plan, if there are any broken tests, update them or create new ones, leverage both jest and playwright
 
 log INFO "Opening final PR..."
 summarizer maestro main
