@@ -10,3 +10,4 @@
 {"task": "Copy assets to public directory", "files_mutated": ["public/profile.png", "public/.nojekyll"], "summary": "Binary copied profile.png to public/, created empty .nojekyll for GitHub Pages."}
 {"task": "Create src/lib/basePath.ts", "files_mutated": ["src/lib/basePath.ts"], "summary": "Exported BASE_PATH='/ralph-node-resume' and withBasePath(path) helper."}
 {"task": "Create src/content/resume.ts exporting typed data", "files_mutated": ["src/content/resume.ts"], "summary": "Added top-level exports for profile, skills, experience, education to complement the resume export."}
+{"task": "Create app/globals.css", "files_mutated": ["app/globals.css"], "summary": "Created globals.css with Tailwind v4 @import, @theme tokens, base resets, and .section-pad utility class."}

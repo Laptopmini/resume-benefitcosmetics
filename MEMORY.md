@@ -1,1 +1,1 @@
-Test was importing profile, skills, experience, education directly but they were nested inside the resume object. Added top-level re-exports: `export const profile = resume.profile;` and similarly for skills, experience, and education. Data was already correct in resume.md transcription.
+Created app/globals.css with @import "tailwindcss", @theme block for font-sans and color tokens, html scroll-behavior smooth, base element resets, and .section-pad utility with responsive py-24/32 px-6/12 and max-w-6xl mx-auto.
