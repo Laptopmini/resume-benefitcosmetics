@@ -1,1 +1,1 @@
-Task complete. Created public/ directory, copied profile.png (5.9MB) into public/, and created empty public/.nojekyll file. Both assets verified present.
+Created src/lib/basePath.ts with BASE_PATH constant and withBasePath helper function.
