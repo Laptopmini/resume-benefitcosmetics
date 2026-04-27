@@ -1,1 +1,0 @@
-TS2882 error: Cannot find module or type declarations for side-effect import of './globals.css'. Created types/css.d.ts with a module declaration for '*.css' files to satisfy TypeScript's module resolution for CSS imports in Next.js.
