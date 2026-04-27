@@ -1,1 +1,1 @@
-Found .gitignore already had .next/ and out/ present. Only needed to append next-env.d.ts at end of file.
+Deleted src/index.ts — file existed and had no imports from any .ts/.tsx files. Confirmed deletion successful.
