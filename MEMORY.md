@@ -1,1 +1,1 @@
-Created src/components/Experience.tsx rendering resume.experience as an ordered timeline. Each role is a motion.li with whileInView fade/slide from left. Contains company, role, period, bullets ul with strong labels, and tech stack chips. All testids follow the pattern experience-{item,company,role,period,bullets,bullet,stack,stack-chip}-{index}.
+Created Education component matching the test spec. Uses motion.li with whileInView fade/slide-up, renders education title in h3, detail in p, and optional status badge in span. Grid layout md:grid-cols-3 for desktop cards.
