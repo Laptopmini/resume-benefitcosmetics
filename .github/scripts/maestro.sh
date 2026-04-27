@@ -319,7 +319,7 @@ while IFS= read -r LEVEL <&3; do
         summarizer "$BACKPRESSURE_BRANCH_NAME" "$BASE_BRANCH_NAME"
 
         log SUCCESS "Generated backpressure for \"$BASE_BRANCH_NAME\"!"
-    done 3<<< "$BRANCHES"
+    done 3<<< "${BRANCHES%$'\n'}"
 
     BACKPRESSURE_BRANCHES=""
     if [[ -s "$PR_TSV_FILE" ]]; then
