@@ -11,3 +11,4 @@
 {"task": "Create src/lib/basePath.ts", "files_mutated": ["src/lib/basePath.ts"], "summary": "Exported BASE_PATH='/ralph-node-resume' and withBasePath(path) helper."}
 {"task": "Create src/content/resume.ts exporting typed data", "files_mutated": ["src/content/resume.ts"], "summary": "Added top-level exports for profile, skills, experience, education to complement the resume export."}
 {"task": "Create app/globals.css", "files_mutated": ["app/globals.css"], "summary": "Created globals.css with Tailwind v4 @import, @theme tokens, base resets, and .section-pad utility class."}
+{"task": "Fix Jest CSS import parsing error", "files_mutated": ["jest.config.mjs", "tests/__mocks__/globals.css.js"], "summary": "Added CSS mock and moduleNameMapper entry to jest.config.mjs to resolve @import syntax error."}

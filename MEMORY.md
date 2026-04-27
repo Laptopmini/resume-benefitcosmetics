@@ -1,1 +1,1 @@
-Created app/globals.css with @import "tailwindcss", @theme block for font-sans and color tokens, html scroll-behavior smooth, base element resets, and .section-pad utility with responsive py-24/32 px-6/12 and max-w-6xl mx-auto.
+Jest failed on CSS @import syntax in globals.css. Fixed by creating tests/__mocks__/globals.css.js mock returning empty module.exports, and adding CSS moduleNameMapper to jest.config.mjs mapping .css files to the mock.

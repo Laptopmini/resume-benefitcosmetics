@@ -20,6 +20,7 @@ const config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
     "^next/font/google$": "<rootDir>/tests/__mocks__/nextFontGoogle.js",
+    "\\.css$": "<rootDir>/tests/__mocks__/globals.css.js",
   },
   setupFilesAfterEnv: ["@testing-library/jest-dom"],
 };
