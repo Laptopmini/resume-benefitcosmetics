@@ -1,0 +1,1 @@
+Updated tsconfig.json for Next.js support: set module to esnext, moduleResolution to bundler, jsx to preserve, noEmit to true, added lib array, plugins array with next name, paths mapping @/* to ./*, updated include with next-env.d.ts and .next/types/**/*.ts, updated exclude to remove tests and add out.
