@@ -12,12 +12,8 @@ source .github/scripts/agents/prompt.sh
 source .github/scripts/summarizer.sh
 source .github/scripts/helpers/notify.sh
 
-# FIXME: Ticketmaster seems to be escaping \" rather than just using them
-
-# FIXME: Blueprint show have tasks with more description. Sometimes they feel a little short and could be interpreted in a different way.
-
-# If implementation fails, send log to agent, review and determine failure
-# If failure is due to backpressure, call agent to fix backpressure, start implementation again
+# NOTE: Backpressure-triage / repair-on-stuck is implemented as the repair agent
+# inside ralph.sh's MAX_LOOPS branch (uses .github/prompts/repair.md).
 
 # Settings
 
@@ -203,17 +199,38 @@ while $MISSING_BLUEPRINT; do
         REUSING_EXISTING_PLAN=true
     else
         log INFO "Generating implementation plan..."
-        # FIXME: Change this into a pure prompt rather than a skill
-        TREE_LEVELS=$(prompt "/blueprint $*" --allowedTools "Read,Glob,Grep,Write($BLUEPRINT_FILE),Edit($BLUEPRINT_FILE),Agent" --model "$STAFF_DEVELOPER_MODEL")
 
-        # FIXME: Should tree levels be written by the skill using a script to avoid divergence?
+        BLUEPRINT_PROMPT_BODY=""
+        if [[ -s .github/prompts/blueprint.md ]]; then
+            BLUEPRINT_PROMPT_BODY=$(cat .github/prompts/blueprint.md)
+        fi
 
-        if [[ -z "$TREE_LEVELS" ]]; then
-            log WARN "Blueprint agent returned no tree levels. Retrying in 5s..."
+        if [[ -n "$BLUEPRINT_PROMPT_BODY" ]]; then
+            BLUEPRINT_PROMPT="$BLUEPRINT_PROMPT_BODY
+
+--- HUMAN FEATURE REQUEST ---
+
+$*
+"
+            prompt "$BLUEPRINT_PROMPT" \
+                --allowedTools "Read,Glob,Grep,Write($BLUEPRINT_FILE),Edit($BLUEPRINT_FILE),Write($BLUEPRINT_LEVELS_FILE),Edit($BLUEPRINT_LEVELS_FILE),Agent" \
+                --model "$STAFF_DEVELOPER_MODEL"
+        else
+            # Fallback to the legacy skill if the prompt file is missing.
+            log WARN "Repo-resident blueprint prompt missing — falling back to /blueprint skill."
+            TREE_LEVELS=$(prompt "/blueprint $*" --allowedTools "Read,Glob,Grep,Write($BLUEPRINT_FILE),Edit($BLUEPRINT_FILE),Agent" --model "$STAFF_DEVELOPER_MODEL")
+            if [[ -n "$TREE_LEVELS" ]]; then
+                echo "$TREE_LEVELS" > "$BLUEPRINT_LEVELS_FILE"
+            fi
+        fi
+
+        if [[ ! -s "$BLUEPRINT_FILE" || ! -s "$BLUEPRINT_LEVELS_FILE" ]]; then
+            log WARN "Blueprint agent did not produce both artifacts. Retrying in 5s..."
+            rm -f "$BLUEPRINT_FILE" "$BLUEPRINT_LEVELS_FILE"
             sleep 5
             continue
         fi
-        echo "$TREE_LEVELS" > "$BLUEPRINT_LEVELS_FILE"
+        TREE_LEVELS=$(cat "$BLUEPRINT_LEVELS_FILE")
     fi
 
     if command -v code &>/dev/null; then
@@ -363,9 +380,15 @@ while IFS= read -r LEVEL <&3; do
 
     log INFO "Proceeding with implementation..."
     rm -f "$PR_TSV_FILE"
+    # Make the blueprint reachable from inside ralph so it can inject the
+    # ticket section into JUNIOR / repair-agent context windows.
+    export MAESTRO_BLUEPRINT_FILE="$BLUEPRINT_FILE"
     while IFS=$'\t' read -r BASE_BRANCH_NAME _PR_NUMBER <&3; do
         # Fail-fast: if any ralph loop fails, abort the entire run
         git checkout "$BASE_BRANCH_NAME" && git pull
+        # Pass the ticket number ralph is implementing so context-window
+        # extraction can find the right "#### Ticket N: …" block.
+        export MAESTRO_TICKET_NUM="${BASE_BRANCH_NAME#prd-}"
         npm i && npm run ralph -- "$FOLDER_NAME"
         git push -u origin "$BASE_BRANCH_NAME"
 
@@ -373,6 +396,7 @@ while IFS= read -r LEVEL <&3; do
 
         log SUCCESS "Finished implementation for \"$BASE_BRANCH_NAME\"!"
     done 3<<< "$BACKPRESSURE_BRANCHES"
+    unset MAESTRO_TICKET_NUM
 
     IMPLEMENTATION_BRANCHES=""
     if [[ -s "$PR_TSV_FILE" ]]; then

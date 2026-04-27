@@ -28,10 +28,9 @@ If your tests require packages not present in devDependencies (e.g., jest-enviro
 You are running in non-interactive mode, if you have a question, pick the solution which does not break an existing constraint.
 
 - DO NOT create or modify application source files (src/, app/, pages/, components/, lib/, styles/).
-- DO NOT modify non-test configuration files (next.config.mjs, tsconfig.json, biome.json, postcss.config.mjs, tailwind.config.*, .env*).
-- You MAY install devDependencies needed for your tests using \`npm install -D <package>\`. Only install test-related packages (e.g., jest-environment-jsdom, @testing-library/jest-dom). Do NOT install application dependencies.
-- You MAY modify \`jest.config.mjs\` when your tests require a different test environment or setup files. Keep changes minimal — only add what your tests need (e.g., testEnvironment, setupFilesAfterEnv, projects). Do NOT remove or alter existing configuration that other tests depend on.
-- Before writing tests, read the full PRD and tsconfig.json. If the PRD includes a task that adds path aliases to tsconfig.json (e.g., \`paths: { \"@/*\": [\"./*\"] }\`), proactively add the corresponding \`moduleNameMapper\` entries to jest.config.mjs (e.g., \`\"^@/(.*)$\": \"<rootDir>/\$1\"\`) so that implementation files using those aliases will resolve correctly when Jest runs the tests.
+- DO NOT modify ANY of these guarded files: jest.config.mjs, tsconfig.json, next.config.mjs, postcss.config.mjs, biome.json, tailwind.config.*, .env*. The orchestrator hard-denies these edits and aborts the whole run if they are mutated. If your tests genuinely require a config change, STOP and report that the blueprint is missing a foundation task — do NOT attempt the change yourself.
+- You MAY install devDependencies needed for your tests using \`npm install -D <package>\`. Only install test-related packages (e.g., jest-environment-jsdom, @testing-library/jest-dom, @testing-library/react). Do NOT install application dependencies.
+- Before writing tests, read the full PRD and the existing jest.config.mjs / tsconfig.json. The blueprint is responsible for designing path aliases, moduleNameMapper, testEnvironment, and setupFilesAfterEnv. Your job is to write tests that work WITH whatever config is already in place. If the foundation ticket clearly missed something needed (e.g., the implementation will use \`@/foo\` aliases but jest has no \`moduleNameMapper\`), still write your tests assuming the config will work, and add one short note to MEMORY.md describing the gap.
 - DO NOT implement any task. If a task says \"Install X\" or \"Create config Y\", write a test that asserts X is installed or Y exists — do not perform the action itself.
 - Only write test files (.test.ts, .spec.ts) and validation scripts (tests/scripts/*.sh).
 - Treat each checkbox item as a single atomic unit of work.
@@ -88,6 +87,42 @@ $LEDGER
 $PRD
 "
 
-prompt "$AGENT_PROMPT" --cli claude --allowedTools "Read,Write,Edit,Glob,Grep,Bash(npm run lint),Bash(npm run check-types),Bash(npm test),Bash(npx jest:*),Bash(npx tsc:*),Bash(npx biome:*),Bash(npm install -D *),Bash(bash tests/scripts/*)"  --model "${SENIOR_DEVELOPER_MODEL:-claude-opus-4-6}"
+# Snapshot files we want to guard against unintended mutation by the backpressure agent.
+# These are files whose semantics belong to the foundation/blueprint, not to a tests-only
+# author. If the agent must change them, the change should originate in the blueprint.
+GUARDED_FILES=(
+    "jest.config.mjs"
+    "tsconfig.json"
+    "next.config.mjs"
+    "postcss.config.mjs"
+    "biome.json"
+)
+
+declare -A GUARDED_HASHES=()
+for f in "${GUARDED_FILES[@]}"; do
+    if [[ -f "$f" ]]; then
+        GUARDED_HASHES[$f]=$(shasum "$f" | awk '{print $1}')
+    else
+        GUARDED_HASHES[$f]=""
+    fi
+done
+
+prompt "$AGENT_PROMPT" --cli claude \
+    --allowedTools "Read,Write,Edit,Glob,Grep,Bash(npm run lint),Bash(npm run check-types),Bash(npm test),Bash(npx jest:*),Bash(npx tsc:*),Bash(npx biome:*),Bash(npm install -D *),Bash(bash tests/scripts/*)" \
+    --disallowedTools "Edit(jest.config.mjs),Write(jest.config.mjs),Edit(tsconfig.json),Write(tsconfig.json),Edit(next.config.mjs),Write(next.config.mjs),Edit(postcss.config.mjs),Write(postcss.config.mjs),Edit(biome.json),Write(biome.json),Bash(rm *),Bash(git:*)" \
+    --model "${SENIOR_DEVELOPER_MODEL:-claude-opus-4-6}"
+
+# Post-mutation audit: if any guarded file changed despite the deny rules, warn loudly.
+# (Belt-and-braces: deny rules can be bypassed by some Bash calls; this catches drift.)
+for f in "${GUARDED_FILES[@]}"; do
+    expected="${GUARDED_HASHES[$f]}"
+    actual=""
+    [[ -f "$f" ]] && actual=$(shasum "$f" | awk '{print $1}')
+    if [[ "$expected" != "$actual" ]]; then
+        log ERROR "Backpressure agent mutated guarded file: $f (was '${expected:-absent}', now '${actual:-absent}')."
+        log ERROR "Guarded files must be designed up front in the blueprint, not added during backpressure. Aborting."
+        exit 1
+    fi
+done
 
 log INFO "Backpressure prompt completed."

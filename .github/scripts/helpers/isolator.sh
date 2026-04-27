@@ -2,6 +2,36 @@
 
 BACKPRESSURE_BACKUP_FOLDER=".maestro.backpressure"
 BACKPRESSURE_FOLDER="tests"
+TASK_TEST_SIDECAR="PRD.md.tests.tsv"
+
+# Resolve the test file path for the active task line. Prefer the sidecar
+# emitted by generate-prd.sh; fall back to parsing the test command's last token.
+# Args: $1 = active PRD task line (the rendered `- [ ] ... [test: cmd]`)
+#       $2 = test command (e.g. "npx jest tests/unit/foo.test.tsx")
+_resolve_test_path() {
+    local task_line="$1"
+    local cmd="$2"
+
+    if [[ -s "$TASK_TEST_SIDECAR" && -n "$task_line" ]]; then
+        local hash
+        hash=$(printf '%s' "$task_line" | shasum | awk '{print $1}')
+        local mapped
+        mapped=$(awk -v h="$hash" -F'\t' '$1==h {print $2; exit}' "$TASK_TEST_SIDECAR")
+        if [[ -n "$mapped" ]]; then
+            printf '%s' "$mapped"
+            return 0
+        fi
+    fi
+
+    # Fallback: last whitespace-separated token, only if it looks like a path.
+    local last="${cmd##* }"
+    if [[ "$last" == *.* && "$last" == */* ]]; then
+        printf '%s' "$last"
+        return 0
+    fi
+
+    return 1
+}
 
 # Moves all tests to a backup folder to avoid agents reading them before they are needed
 isolate_backpressure() {
@@ -25,11 +55,15 @@ isolate_backpressure() {
     log INFO "Isolated backpressure!"
 }
 
-# Restore backpressure to its original location so that the agents can read them
-# If called with no arguments, restore all backpressure
-# If called with a single argument, restore backpressure for that command
+# Restore backpressure to its original location so that the agents can read them.
+# Usage:
+#   restore_backpressure                      # restore everything in the backup
+#   restore_backpressure "<test-command>"     # restore the file for the active task only
+#   restore_backpressure "<cmd>" "<task-line>"# preferred: lets sidecar resolve precisely
 restore_backpressure() {
     local COMMAND="${1:-}"
+    local TASK_LINE="${2:-${CURRENT_TASK:-}}"
+
     if [ -z "$COMMAND" ]; then
         log INFO "Restoring all backpressure..."
 
@@ -41,32 +75,32 @@ restore_backpressure() {
         mkdir -p "$BACKPRESSURE_FOLDER"
         rsync -av --ignore-existing "$BACKPRESSURE_BACKUP_FOLDER/$BACKPRESSURE_FOLDER"/ "$BACKPRESSURE_FOLDER"/
         rm -rf "$BACKPRESSURE_BACKUP_FOLDER"
-    else
-        log INFO "Restoring backpressure for $COMMAND..."
-        local file_path="${COMMAND##* }"
-
-        if [[ ! "$file_path" == *.* ]]; then
-            log INFO "No file path found in $COMMAND. Skipping restoration..."
-            return 0
-        fi
-
-        # Verify that the file path is not already moved
-        if [[ -f "$file_path" ]]; then
-            log INFO "The file $file_path has already been moved. Skipping restoration..."
-            return 0
-        fi
-
-        # Verify that the given file exists in the backpressure backup folder
-        if [[ ! -f "$BACKPRESSURE_BACKUP_FOLDER/$file_path" ]]; then
-            log WARN "The test file $file_path does not exist in $BACKPRESSURE_BACKUP_FOLDER. Skipping restoration..."
-            return 0
-        fi
-
-        # Move back the targeted backpressure into its expected location
-        mkdir -p "$(dirname "$file_path")"
-        mv -f "$BACKPRESSURE_BACKUP_FOLDER/$file_path" "$file_path"
+        log INFO "Restored backpressure!"
+        return 0
     fi
-    
+
+    log INFO "Restoring backpressure for $COMMAND..."
+
+    local file_path
+    if ! file_path=$(_resolve_test_path "$TASK_LINE" "$COMMAND"); then
+        log INFO "No test file resolvable from '$COMMAND'. Skipping restoration..."
+        return 0
+    fi
+
+    # Already in place — nothing to do (deterministic, not a heuristic).
+    if [[ -f "$file_path" ]]; then
+        log INFO "The file $file_path is already in place. Skipping restoration..."
+        return 0
+    fi
+
+    if [[ ! -f "$BACKPRESSURE_BACKUP_FOLDER/$file_path" ]]; then
+        log WARN "The test file $file_path does not exist in $BACKPRESSURE_BACKUP_FOLDER. Skipping restoration..."
+        return 0
+    fi
+
+    mkdir -p "$(dirname "$file_path")"
+    mv -f "$BACKPRESSURE_BACKUP_FOLDER/$file_path" "$file_path"
+
     log INFO "Restored backpressure!"
 }
 

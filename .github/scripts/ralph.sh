@@ -17,7 +17,6 @@ LOCK_FILE=".ralph.lock"
 MAX_LOOPS=10 # This is the maximum number of iterations per task
 TYPE_CHECK_CMD="npm run check-types"
 UNIT_TEST_CMD="npx jest --silent --no-verbose"
-E2E_TEST_CMD="npx playwright test --reporter=line"
 
 # Main
 
@@ -85,10 +84,114 @@ while true; do
     fi
 
     if [[ "$LOOP_COUNTER" -ge "$MAX_LOOPS" ]]; then
-        log ERROR "⚠️ Max loops reached for task:
-    $CURRENT_TASK
-    Aborting..."
-        exit 1
+        log WARN "⚠️ Max loops reached for task. Escalating to repair agent before aborting..."
+
+        REPAIR_PROMPT_BODY=$(cat .github/prompts/repair.md 2>/dev/null || echo "")
+        if [[ -z "$REPAIR_PROMPT_BODY" ]]; then
+            log ERROR "Repair prompt missing at .github/prompts/repair.md. Aborting."
+            exit 1
+        fi
+
+        REPAIR_TARGETED_TEST=$(echo "$CURRENT_TASK" | sed -n 's/.*`\[test: \(.*\)\]`.*/\1/p')
+        REPAIR_TEST_FILE=""
+        if [[ -s PRD.md.tests.tsv && -n "$CURRENT_TASK" ]]; then
+            _repair_hash=$(printf '%s' "$CURRENT_TASK" | shasum | awk '{print $1}')
+            REPAIR_TEST_FILE=$(awk -v h="$_repair_hash" -F'\t' '$1==h {print $2; exit}' PRD.md.tests.tsv)
+        fi
+        REPAIR_TEST_CONTENTS=""
+        if [[ -n "$REPAIR_TEST_FILE" && -f "$REPAIR_TEST_FILE" ]]; then
+            REPAIR_TEST_CONTENTS=$(cat "$REPAIR_TEST_FILE")
+        fi
+
+        REPAIR_BLUEPRINT_CONTEXT=""
+        if [[ -n "${MAESTRO_BLUEPRINT_FILE:-}" && -s "${MAESTRO_BLUEPRINT_FILE}" && -n "${MAESTRO_TICKET_NUM:-}" ]]; then
+            REPAIR_BLUEPRINT_CONTEXT=$(awk -v num="${MAESTRO_TICKET_NUM}" '
+                BEGIN { found = 0 }
+                /^#### Ticket [0-9]+/ {
+                    if (found) exit
+                    tmp = $0; sub(/^#### Ticket /, "", tmp)
+                    if ((tmp + 0) == num) { found = 1 }
+                }
+                found { print }
+            ' "${MAESTRO_BLUEPRINT_FILE}")
+        fi
+
+        REPAIR_PROMPT="
+$REPAIR_PROMPT_BODY
+
+--- ACTIVE PRD TASK (the loop is stuck here) ---
+
+$CURRENT_TASK
+
+--- LAST FAILING VALIDATION ---
+
+Command: $REPAIR_TARGETED_TEST
+
+Output:
+$TEST_OUTPUT
+
+--- FAILING TEST FILE (${REPAIR_TEST_FILE:-unresolved}) ---
+
+$REPAIR_TEST_CONTENTS
+
+--- LAST 5 LEDGER ENTRIES ---
+
+$(tail -n 5 .agent-ledger.jsonl 2>/dev/null || echo 'No history.')
+
+--- TICKET BLUEPRINT (design intent) ---
+
+$REPAIR_BLUEPRINT_CONTEXT
+"
+
+        set +e
+        REPAIR_OUTPUT=$(prompt "$REPAIR_PROMPT" \
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash" \
+            --disallowedTools "Bash(git:*),Bash(npm test*),Bash(npm run test*),Bash($TYPE_CHECK_CMD*),Bash(npx jest*),Bash(npx playwright*),Bash(npx tsc*)" \
+            --model "${SENIOR_DEVELOPER_MODEL:-claude-opus-4-6}")
+        REPAIR_EXIT=$?
+        set -e
+
+        if [[ $REPAIR_EXIT -ne 0 ]]; then
+            log ERROR "Repair agent failed (exit $REPAIR_EXIT). Aborting."
+            exit 1
+        fi
+
+        REPAIR_VERDICT=$(echo "$REPAIR_OUTPUT" | sed -n 's/.*<verdict>\(.*\)<\/verdict>.*/\1/p' | head -n1)
+        REPAIR_SUMMARY=$(echo "$REPAIR_OUTPUT" | awk '/<summary>/{flag=1; sub(/.*<summary>/,""); } /<\/summary>/{sub(/<\/summary>.*/,""); print; exit} flag{print}')
+
+        log INFO "Repair verdict: ${REPAIR_VERDICT:-(none)}"
+        log INFO "Repair summary: ${REPAIR_SUMMARY:-(none)}"
+
+        case "$REPAIR_VERDICT" in
+            code-fix)
+                log INFO "Repair patched code directly. Resetting loop counter and re-validating."
+                LOOP_COUNTER=0
+                continue
+                ;;
+            backpressure-bug)
+                REPAIR_DIFF=$(echo "$REPAIR_OUTPUT" | awk '/<diff>/{flag=1; next} /<\/diff>/{flag=0} flag')
+                if [[ -z "$REPAIR_DIFF" ]]; then
+                    log ERROR "Repair declared backpressure-bug but emitted no <diff> body. Aborting."
+                    exit 1
+                fi
+                if ! echo "$REPAIR_DIFF" | git apply --check 2>/dev/null; then
+                    log ERROR "Repair diff failed git apply --check. Aborting."
+                    echo "$REPAIR_DIFF" | head -40 >&2
+                    exit 1
+                fi
+                echo "$REPAIR_DIFF" | git apply
+                git add .
+                git commit -m "fix(ai): Repair backpressure for stuck task" || true
+                log INFO "Backpressure patched. Resetting loop counter."
+                LOOP_COUNTER=0
+                continue
+                ;;
+            abort|*)
+                log ERROR "Repair declined to recover. Surfacing to human and aborting."
+                log ERROR "${REPAIR_SUMMARY:-(no summary)}"
+                exit 1
+                ;;
+        esac
     fi
 
     LOOP_COUNTER=$((LOOP_COUNTER+1))
@@ -111,10 +214,39 @@ while true; do
     RALPH_PROMPT=$(cat .github/prompts/ralph.md 2>/dev/null || echo "You are an autonomous developer.")
     LEDGER_CONTEXT=$(tail -n 5 .agent-ledger.jsonl 2>/dev/null || echo "No history.")
     MEMORY_CONTEXT=$(cat MEMORY.md 2>/dev/null || echo "Scratchpad empty.")
-    PRD_CONTENT=$(awk '
-        { print }
-        ENVIRON["CURRENT_TASK"] == $0 { exit }
-    ' PRD.md)
+    FULL_PRD_CONTENT=$(cat PRD.md)
+
+    # Pull the matching ticket section out of the blueprint, if one is reachable.
+    # Maestro exports MAESTRO_BLUEPRINT_FILE; the inner ralph script falls back to a no-op.
+    BLUEPRINT_TICKET_CONTEXT=""
+    if [[ -n "${MAESTRO_BLUEPRINT_FILE:-}" && -s "${MAESTRO_BLUEPRINT_FILE}" && -n "${MAESTRO_TICKET_NUM:-}" ]]; then
+        BLUEPRINT_TICKET_CONTEXT=$(awk -v num="${MAESTRO_TICKET_NUM}" '
+            BEGIN { found = 0 }
+            /^#### Ticket [0-9]+/ {
+                if (found) exit
+                tmp = $0; sub(/^#### Ticket /, "", tmp)
+                if ((tmp + 0) == num) { found = 1 }
+            }
+            found { print }
+        ' "${MAESTRO_BLUEPRINT_FILE}")
+    fi
+
+    # Inline the current contents of any backticked file paths the task names, so the
+    # JUNIOR model can correlate failures without a re-Read round-trip.
+    REFERENCED_FILES_CONTEXT=""
+    while IFS= read -r ref_path; do
+        [[ -z "$ref_path" ]] && continue
+        [[ "$ref_path" == */ ]] && continue
+        [[ ! -f "$ref_path" ]] && continue
+        # Cap each file at ~200 lines to keep the window bounded
+        REFERENCED_FILES_CONTEXT+=$'\n=== '"$ref_path"$' ===\n'
+        REFERENCED_FILES_CONTEXT+=$(head -200 "$ref_path")
+        REFERENCED_FILES_CONTEXT+=$'\n'
+    done < <(printf '%s\n' "$CURRENT_TASK" \
+        | grep -oE '`[^`]+`' \
+        | sed 's/^`//; s/`$//' \
+        | grep -E '\.(ts|tsx|js|jsx|mjs|cjs|json|css|md|yml|yaml)$' \
+        | sort -u)
 
     AGENT_PROMPT="
 $RALPH_PROMPT${ERROR_FEEDBACK:+$'\n'}$ERROR_FEEDBACK
@@ -126,15 +258,17 @@ $LEDGER_CONTEXT
 --- YOUR PREVIOUS NOTES (MEMORY.md) ---
 
 $MEMORY_CONTEXT
+${BLUEPRINT_TICKET_CONTEXT:+$'\n--- TICKET BLUEPRINT (read-only, for design intent) ---\n\n'}${BLUEPRINT_TICKET_CONTEXT}
+${REFERENCED_FILES_CONTEXT:+$'\n--- CURRENT CONTENTS OF FILES NAMED IN THE TASK ---\n'}${REFERENCED_FILES_CONTEXT}
 
---- YOUR CURRENT TASK ---
+--- FULL PRD (your active task is the first unchecked checkbox) ---
 
-$PRD_CONTENT
+$FULL_PRD_CONTENT
 "
 
     ERROR_FEEDBACK=""
 
-    restore_backpressure "$TARGETED_TEST"
+    restore_backpressure "$TARGETED_TEST" "$CURRENT_TASK"
 
     set +e
     OUTPUT=$(prompt "$AGENT_PROMPT" \
@@ -181,42 +315,44 @@ $PRD_CONTENT
         exit 1
     fi
 
-    TASK_VALIDATION=()
     UNCHECKED_COUNT=$(grep -c "^\s*- \[ \]" PRD.md || true)
 
-    # Make sure to lint unless biome is already being used
-    if [[ "$TARGETED_TEST" != "npm run lint"* ]]; then
-        TASK_VALIDATION+=("npm run lint")
+    # Build validation set: typecheck + targeted test + every previously-passing
+    # targeted test (regression guard). On the last task we also restore the
+    # full backpressure suite and run lint + unit + e2e once.
+    COMBINED_VALIDATION=("$TYPE_CHECK_CMD" "$TARGETED_TEST")
+    PREVIOUS_TASK_VALIDATION_LOOKUP[$TYPE_CHECK_CMD]=1
+
+    if [[ ${#PREVIOUS_TASK_VALIDATION[@]} -gt 0 ]]; then
+        COMBINED_VALIDATION+=("${PREVIOUS_TASK_VALIDATION[@]}")
     fi
 
-    # Add the targeted test command
-    TASK_VALIDATION+=("$TARGETED_TEST")
-
-    # Combine the required task validations into a single array
-    COMBINED_VALIDATION=("${TASK_VALIDATION[@]}")
     if [ "$UNCHECKED_COUNT" -eq 1 ]; then
-        # If this is the last task, include a final typecheck & full test suite
-        COMBINED_VALIDATION+=("$TYPE_CHECK_CMD")
-        PREVIOUS_TASK_VALIDATION_LOOKUP[$TYPE_CHECK_CMD]=1
+        # Last task: pull every isolated test back into place and run the full battery once.
+        restore_backpressure
+        COMBINED_VALIDATION+=("npm run lint")
 
-        if ls -A tests/unit | grep -q .; then
+        if [ -d tests/unit ] && ls -A tests/unit 2>/dev/null | grep -q .; then
             COMBINED_VALIDATION+=("$UNIT_TEST_CMD")
             PREVIOUS_TASK_VALIDATION_LOOKUP[$UNIT_TEST_CMD]=1
         fi
 
-        if ls -A tests/e2e | grep -q .; then
-            COMBINED_VALIDATION+=("$E2E_TEST_CMD")
-            PREVIOUS_TASK_VALIDATION_LOOKUP[$E2E_TEST_CMD]=1
-        fi
-
-        # Restore all backpressure
-        restore_backpressure
-    elif [[ ${#PREVIOUS_TASK_VALIDATION[@]} -gt 0 ]]; then
-        # Make sure previous tasks are still passing
-        COMBINED_VALIDATION+=("${PREVIOUS_TASK_VALIDATION[@]}")
+        # Note: Playwright/E2E intentionally not run inside ralph — there is no
+        # next-dev server orchestrated here, so the gate would be silently
+        # broken once any real spec lands. E2E belongs in CI on the deploy branch.
     fi
 
-    # FIXME: Remove duplicate validations, multiple `npx tsc --noEmit` for example
+    # Dedupe while preserving order
+    declare -A _seen=()
+    DEDUPED_VALIDATION=()
+    for cmd in "${COMBINED_VALIDATION[@]}"; do
+        if [[ -z "${_seen[$cmd]:-}" ]]; then
+            _seen[$cmd]=1
+            DEDUPED_VALIDATION+=("$cmd")
+        fi
+    done
+    COMBINED_VALIDATION=("${DEDUPED_VALIDATION[@]}")
+    unset _seen
 
     for TEST_COMMAND in "${COMBINED_VALIDATION[@]}"; do
         log INFO "Running Validation: $TEST_COMMAND"
@@ -271,20 +407,35 @@ $PRD_CONTENT
 
         ERROR_FEEDBACK_HEADER="YOUR LAST ATTEMPT FAILED!
         You tried to complete the task, but the validation failed."
+        REGRESSION_HINT=""
         if [[ ${PREVIOUS_TASK_VALIDATION_LOOKUP[$TEST_COMMAND]:-} ]]; then
             ERROR_FEEDBACK_HEADER="YOUR LAST ATTEMPT CAUSED A REGRESSION!
-        You successfully implemented the task, but a previously working validation is now failing."
+        A validation that was previously passing has just broken. The fix is almost
+        certainly in code you mutated this cycle — NOT in the test, and NOT in code
+        from earlier tasks unless your most recent edit touched it."
+            # Try to surface the most recent ledger entry whose files_mutated
+            # overlap with files referenced by the failing test command.
+            if [[ -s .agent-ledger.jsonl ]]; then
+                local_test_target=$(printf '%s' "$TEST_COMMAND" | awk '{print $NF}')
+                if [[ -n "$local_test_target" && -f "$local_test_target" ]]; then
+                    REGRESSION_HINT=$(grep -F "$local_test_target" .agent-ledger.jsonl | tail -n 1 || true)
+                fi
+                if [[ -z "$REGRESSION_HINT" ]]; then
+                    REGRESSION_HINT=$(tail -n 1 .agent-ledger.jsonl)
+                fi
+            fi
         fi
 
         ERROR_FEEDBACK="
         $ERROR_FEEDBACK_HEADER
-        
+
         Test Command: $TEST_COMMAND
         Exit Code: $TEST_EXIT_CODE
-        
+${REGRESSION_HINT:+$'\n        Most recent ledger entry that mutated this surface:\n        '}${REGRESSION_HINT}
+
         Test Output / Error Logs:
         $TEST_OUTPUT
-        
+
         Please analyze the error, fix the code, and try again.
         "
 
