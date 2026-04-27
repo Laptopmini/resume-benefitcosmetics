@@ -1,1 +1,1 @@
-Created src/components/Section.tsx per test spec. Component accepts id, title?, testId, and children props. Renders section with section-pad class. Conditionally renders h2 with Apple-style typography when title is provided. Uses template literal for data-testid on heading.
+TS2882 error: Cannot find module or type declarations for side-effect import of './globals.css'. Created types/css.d.ts with a module declaration for '*.css' files to satisfy TypeScript's module resolution for CSS imports in Next.js.
