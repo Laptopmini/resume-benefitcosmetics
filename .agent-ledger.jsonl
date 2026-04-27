@@ -21,3 +21,4 @@
 {"task": "Create src/components/Skills.tsx", "files_mutated": ["src/components/Skills.tsx"], "summary": "Skills component rendering four category groups with motion animations and pill-styled chips."}
 {"task": "Create src/components/Experience.tsx", "files_mutated": ["src/components/Experience.tsx"], "summary": "Experience component with timeline rendering resume.experience entries with motion.li animations, bullets with strong labels, and tech stack chips."}
 {"task": "Create src/components/Education.tsx", "files_mutated": ["src/components/Education.tsx"], "summary": "Education component with motion animation, md:grid-cols-3 layout, title h3, detail p, optional status span."}
+{"task": "Modify app/page.tsx", "files_mutated": ["tsconfig.json"], "summary": "Added @/app/* path mapping to tsconfig.json to fix @/app/page import resolution."}

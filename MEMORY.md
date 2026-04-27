@@ -1,1 +1,1 @@
-Created Education component matching the test spec. Uses motion.li with whileInView fade/slide-up, renders education title in h3, detail in p, and optional status badge in span. Grid layout md:grid-cols-3 for desktop cards.
+Test showed import `@/app/page` couldn't be resolved. Added `"@/app/*": ["./app/*"]` to tsconfig.json paths to allow the mock mapper to work properly.
