@@ -1,0 +1,1 @@
+Created SiteNav.tsx with 'use client' directive, imported tiltOnHover from @/lib/motion, rendered nav with sticky/zan/bg-cream classes, max-w-editorial container, P-V Mini brand, and four anchor links wrapped in motion.span with tiltOnHover.
