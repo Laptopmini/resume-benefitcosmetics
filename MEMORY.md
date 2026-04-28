@@ -1,1 +1,1 @@
-The jest.config.mjs already has all three required changes (testEnvironment, moduleNameMapper, setupFilesAfterEnv), and both helper files (styleMock.js and jest.setup.ts) exist with correct content. No changes needed.
+Created types/css.d.ts with `declare module '*.css';` to enable CSS imports in TypeScript without type errors.

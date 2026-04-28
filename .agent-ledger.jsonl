@@ -7,3 +7,4 @@
 {"task": "Create postcss.config.mjs", "files_mutated": ["postcss.config.mjs"], "summary": "Created postcss.config.mjs exporting plugins object with tailwindcss and autoprefixer."}
 {"task": "Create tailwind.config.ts", "files_mutated": ["tailwind.config.ts"], "summary": "Created tailwind.config.ts exporting Config with content pattern and full theme.extend."}
 {"task": "Edit jest.config.mjs and create helpers", "files_mutated": [], "summary": "No changes required. jest.config.mjs and helper files already exist with correct configuration."}
+{"task": "Create CSS ambient types", "files_mutated": ["types/css.d.ts"], "summary": "Created types/css.d.ts declaring *.css module for TypeScript."}
