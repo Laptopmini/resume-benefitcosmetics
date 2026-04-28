@@ -11,24 +11,20 @@ export default function ExperienceTimeline() {
       <span className="font-script text-3xl text-rose">{COPY.experienceLabel}</span>
       <h2 className="font-display text-4xl">{COPY.experienceHeading}</h2>
 
-      {EXPERIENCE.map((item, index) => (
+      {EXPERIENCE.map((item) => (
         <motion.article
           key={item.company}
           className="editorial-card mt-10 relative"
-          data-testid="experience-entry"
           {...bannerEntrance}
+          data-testid="experience-entry"
         >
-          <div className="absolute top-0 left-0">
-            <Starburst size={90} fill="var(--mustard)">
-              <span className="font-mono text-xs text-ink">{item.period}</span>
-            </Starburst>
-          </div>
+          <Starburst size={90} fill="var(--mustard)">
+            <span className="font-mono text-xs text-ink">{item.period}</span>
+          </Starburst>
           <h3 className="font-display text-3xl">
             {item.role} · {item.company}
           </h3>
-          <p data-testid={`location-${index}`} className="font-mono text-sm text-rose">
-            {item.location}
-          </p>
+          <p className="font-mono text-sm text-rose">{item.location}</p>
           <ul className="mt-4 space-y-3">
             {item.bullets.map((bullet) => (
               <li key={bullet.heading}>
@@ -41,7 +37,6 @@ export default function ExperienceTimeline() {
             {item.stack.map((tech) => (
               <span
                 key={tech}
-                data-testid="tech-chip"
                 className="ink-rule bg-blush rounded-full px-3 py-1 font-mono text-xs"
               >
                 {tech}

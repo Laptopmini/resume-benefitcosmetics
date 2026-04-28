@@ -1,1 +1,1 @@
-Fixed lint error in SkillsCard.tsx by using a suffix ('first'/'second') based on whether index is in first or second half of the duplicated array, instead of using raw index in the key.
+Implemented ExperienceTimeline.tsx with default export, section with data-testid, eyebrow, heading, and per-entry articles each containing Starburst (fill="var(--mustard)"), role · company h3, location p, bullets ul, and tech stack chip div. Each entry wrapped in motion.article with bannerEntrance. Used double quotes and semicolons per biome.json config.

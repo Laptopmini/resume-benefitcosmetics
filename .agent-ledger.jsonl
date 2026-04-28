@@ -19,3 +19,4 @@
 {"task": "Create src/components/BannerHero.tsx", "files_mutated": ["src/components/BannerHero.tsx"], "summary": "Created BannerHero with Starburst, profile image, heading, tagline, and 3 parallax Sparkles."}
 {"task": "Create src/components/ProfileCard.tsx", "files_mutated": ["src/components/ProfileCard.tsx"], "summary": "Created ProfileCard with motion wrapper, section, eyebrow span, heading h2, and summary paragraph with data-testid."}
 {"task": "Create src/components/SkillsCard.tsx", "files_mutated": ["src/components/SkillsCard.tsx"], "summary": "Fixed key prop to avoid array index, using label + first/second suffix instead."}
+{"task": "Create src/components/ExperienceTimeline.tsx", "files_mutated": ["src/components/ExperienceTimeline.tsx"], "summary": "Created ExperienceTimeline with Starburst period, role/company, location, bullets ul, and tech stack chips per experience entry."}
