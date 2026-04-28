@@ -1,7 +1,7 @@
 export const BASE_PATH = "/ralph-node-resume";
 
 export function withBasePath(path: string): string {
-  return `${BASE_PATH}${path.startsWith("/") ? path : "/" + path}`;
+  return `${BASE_PATH}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 export function stripBasePath(path: string): string {
