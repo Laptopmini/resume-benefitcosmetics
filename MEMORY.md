@@ -1,1 +1,1 @@
-Created tailwind.config.ts with Config type, content pattern, and full theme.extend with colors, fontFamily, boxShadow, and maxWidth as specified.
+The TS18003 error occurred because there were no .ts or .tsx files in src/ and no .d.ts files anywhere to match the include patterns. Fixed by creating types/global/base.d.ts (matching the `types/**/*.d.ts` pattern). This gives tsc at least one input to process. No other changes needed.
