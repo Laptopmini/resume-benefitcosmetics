@@ -1,1 +1,1 @@
-Created next.config.mjs with the exact configuration specified: output: 'export', basePath: '/ralph-node-resume', assetPrefix: '/ralph-node-resume', images: { unoptimized: true }, trailingSlash: true, reactStrictMode: true. Used export default as specified.
+Created postcss.config.mjs with the exact configuration specified: { plugins: { tailwindcss: {}, autoprefixer: {} } } using export default as specified.

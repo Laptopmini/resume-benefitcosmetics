@@ -4,3 +4,4 @@
 {"task": "Wire up a root test script", "files_mutated": [], "summary": "No changes required. The package.json 'test' script was already set to 'npm run test:unit && npm run test:e2e' from the previous Playwright configuration cycle."}
 {"task": "Install runtime deps and dev deps, add scripts, delete placeholder", "files_mutated": ["package.json"], "summary": "Moved @types/react and @types/react-dom to devDependencies with correct versions ^18.3.11 and ^18.3.0."}
 {"task": "Create next.config.mjs", "files_mutated": ["next.config.mjs"], "summary": "Created next.config.mjs exporting Next.js static export config with /ralph-node-resume basePath and asset prefix."}
+{"task": "Create postcss.config.mjs", "files_mutated": ["postcss.config.mjs"], "summary": "Created postcss.config.mjs exporting plugins object with tailwindcss and autoprefixer."}
