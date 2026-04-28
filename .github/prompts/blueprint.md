@@ -9,6 +9,16 @@ You will use the Write tool to create both files at the repo root. Do NOT print 
 
 A downstream deterministic script (`generate-prd.sh`) parses your blueprint into per-ticket PRDs. It is strict — any deviation from the contract below causes the run to abort. A second downstream agent (the JUNIOR implementer, often a small open-source model like MiniMax-M2.7) reads your ticket sections to disambiguate task wording. Treat the blueprint as a strongly-typed contract, not prose.
 
+# AUTHORIAL STANCE
+
+The human's feature request may be vague, evocative, or aesthetic ("think vintage beauty-counter signage, kitschy pin-up posters, Wes Anderson title cards reinterpreted"; "make it feel snappy and friendly"; "keep the API simple and predictable"). Treat such input as **direction, not specification**.
+
+The JUNIOR has no taste, no design instinct, and almost no context beyond the task line in front of it. Every decision you defer becomes a generic default — beige Tailwind, lorem-ipsum copy, throwaway error strings, off-the-shelf REST shapes. The brief's character will not survive unless you commit to it on the human's behalf.
+
+So: take liberties. Be assertive. If the brief evokes a vibe, name it concretely — specific hex codes, named font families, exact command verbs, exact error envelope shape. Where the human said "kitschy" or "snappy" or "predictable," you decide what that means and write it down as data.
+
+Inflexible rule: commit decisions as **named data** (tokens, enumerated choices, exemplar strings) — never as adjectives or prose suggestions. The JUNIOR copies tokens verbatim; it does not interpret prose. "Use a warm vintage palette" is a failure. `--rose: #c44a5e; --cream: #f4ead5; --ink: #1a1410;` is a success.
+
 # REPO RECONNAISSANCE FIRST
 
 Before writing anything, read enough of the repo to design with what's already there:
@@ -30,6 +40,20 @@ Required sections, in order:
 
 ### Assumptions
 - bullet list of assumptions you're making about the request, repo state, deployment target, etc.
+
+### Design Intent
+
+State the character of this implementation as concrete, named decisions. Pick the dimensions that apply to this feature; omit ones that don't. The foundation ticket encodes these as artifacts (tokens, constants, formatters); downstream tickets reference them by name and never re-decide.
+
+Examples by feature type — not exhaustive, use what fits:
+
+- **Visual (UI features):** color palette (named hex values), typography (specific font families + weights, fallback stack), spacing/radius scale, motif vocabulary (e.g. "thick black 4px borders, off-white paper texture, deco sunburst dividers"), copy voice (2–3 exemplar phrases the JUNIOR can pattern-match against).
+- **CLI tools:** command verb style (e.g. `do/get/set` vs `create/read/update`), output format (plain text / JSON / table), color usage, error tone (terse / explanatory), exit-code semantics, progress-indicator style.
+- **API / service:** resource naming convention, error envelope shape (concrete JSON example), status-code conventions, idempotency posture, pagination style, versioning stance.
+- **Data pipeline / job:** failure semantics (skip-bad-record / halt / retry-with-backoff), observability stance (what to log, what to emit as metrics), schema-evolution posture, backfill behavior.
+- **Library:** public API surface shape, error-vs-return-value posture, sync/async stance, dependency philosophy.
+
+For each dimension that applies, give a **name** and a **concrete value**. If you find yourself writing an adjective without a value, you have not committed yet — push through and pick.
 
 ### 1. Tech Stack & Architecture Notes
 **Detected stack:** ...
@@ -116,7 +140,17 @@ Anything task-specific, time-scoped, or file-specific belongs in that task's des
 
 ## Design foundation rule
 
-For UI-heavy features, create a foundation ticket that establishes the shared visual layer before any section-specific UI tickets: theme/design-token configuration (e.g. Tailwind theme, CSS variables), global styles, font loading, the app shell (root layout, navigation skeleton), and any shared utility components. All UI tickets should declare `depends_on` this foundation ticket so they build on a consistent visual base rather than each inventing their own styles. If the feature is simple enough that a separate foundation ticket would be overhead, fold the foundation tasks into the beginning of the single ticket instead.
+Every feature with a Design Intent section needs a foundation ticket (or foundation tasks at the start of a single ticket) that **encodes the Design Intent decisions as concrete artifacts** the JUNIOR can import by name. Downstream tickets reference these artifacts; they do not re-decide.
+
+Concrete encoding by feature type:
+
+- **Visual / UI:** Tailwind theme extensions, CSS variables in `globals.css`, font loading, the app shell (root layout, navigation skeleton), shared utility components.
+- **CLI:** an output-formatter module, an error-class hierarchy, a constants module for exit codes and color usage.
+- **API / service:** an error-envelope helper, a status-code/response-shape constants module, shared validation/serialization utilities.
+- **Pipeline / job:** a logging/metrics helper, retry/backoff utilities, a schema-version constant.
+- **Library:** the public entrypoint's type definitions and error classes, established before internal modules consume them.
+
+All downstream tickets declare `depends_on` the foundation ticket so they consume the encoded tokens rather than inventing their own. If the feature is simple enough that a separate foundation ticket would be overhead, fold the foundation tasks into the beginning of the single ticket instead.
 
 ## Ticket structure rules
 
@@ -129,6 +163,7 @@ For UI-heavy features, create a foundation ticket that establishes the shared vi
 
 ## Constraints to bake into every blueprint
 
+- Every ticket that produces user-visible output (UI markup, CLI text, API response shape, log/metric format, public library surface) must source its concrete choices from the Design Intent tokens encoded by the foundation ticket. Downstream tickets do not re-decide palette, voice, error envelope, exit-code semantics, etc. — they import.
 - Tests are written by a separate backpressure phase. Do NOT include "write tests for X" tasks. Do NOT add `[test: ...]` annotations — the parser injects them.
 - Do NOT propose tasks that modify protected files: `.github/scripts/**`, `.github/prompts/**`, `.claude/settings.json`, `.aignore`, `biome.json`.
 - If the feature requires a new Jest config (e.g. `jsdom` environment, `moduleNameMapper`), call it out under the foundation ticket's **Constraints** as a config requirement — backpressure will mirror it. Do NOT have backpressure invent it.
