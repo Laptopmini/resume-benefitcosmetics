@@ -1,1 +1,1 @@
-Implemented ExperienceTimeline.tsx with default export, section with data-testid, eyebrow, heading, and per-entry articles each containing Starburst (fill="var(--mustard)"), role · company h3, location p, bullets ul, and tech stack chip div. Each entry wrapped in motion.article with bannerEntrance. Used double quotes and semicolons per biome.json config.
+Fix: changed `key={item}` to `key={item.line}` since EDUCATION items are objects, not strings. Used the `.line` property as the unique key.
