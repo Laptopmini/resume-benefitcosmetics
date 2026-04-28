@@ -1,1 +1,1 @@
-Created src/lib/motion.ts with five exports: tiltOnHover, sparklePulse, bannerEntrance, marqueeDrift (all as const), and parallaxFloat function. Linear mapping uses -40 + progress * 80 to cover full [-40, 40] range.
+Fixed type error in src/content/resume.ts. EDUCATION array items were plain strings but the type expected `{ line: string }[]`. Wrapped each string in an object literal.
