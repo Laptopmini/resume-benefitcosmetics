@@ -1,1 +1,1 @@
-Created src/components/BannerHero.tsx with all required elements: Starburst with COPY.heroEyebrow, profile Image wrapped in motion.div with tiltOnHover, h1 and p with data-testids, three Sparkle components with scroll-driven parallax using parallaxFloat(0) and parallaxFloat(1).
+Created src/components/ProfileCard.tsx with all required elements: section with editorial-card bg-blush, span with COPY.profileLabel, h2 with COPY.profileHeading, p with PROFILE.summary and data-testid, wrapped in motion.div with bannerEntrance.

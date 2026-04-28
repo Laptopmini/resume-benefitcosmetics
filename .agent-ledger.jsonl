@@ -17,3 +17,4 @@
 {"task": "Fix lint errors in basePath.ts and Starburst.tsx", "files_mutated": ["src/lib/basePath.ts", "src/components/Starburst.tsx"], "summary": "Fixed template literal in withBasePath, added title element to SVG for accessibility."}
 {"task": "Create src/components/SunburstDivider.tsx", "files_mutated": ["src/components/SunburstDivider.tsx"], "summary": "Created SunburstDivider with 24 alternating rose/mustard polygon rays from top-center, horizontal ink rule at y=2, and data-testid on wrapper div."}
 {"task": "Create src/components/BannerHero.tsx", "files_mutated": ["src/components/BannerHero.tsx"], "summary": "Created BannerHero with Starburst, profile image, heading, tagline, and 3 parallax Sparkles."}
+{"task": "Create src/components/ProfileCard.tsx", "files_mutated": ["src/components/ProfileCard.tsx"], "summary": "Created ProfileCard with motion wrapper, section, eyebrow span, heading h2, and summary paragraph with data-testid."}
