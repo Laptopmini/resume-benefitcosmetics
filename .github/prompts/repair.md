@@ -11,13 +11,17 @@ Below this prompt, the orchestrator has injected:
 
 Read all four before acting.
 
+# DIAGNOSTIC HINT: FORMATTER-VS-TEST CONFLICTS
+
+The validation pipeline runs `npm run lint` (auto-fix) on implementation files BEFORE the targeted test. If a test uses `assert_grep` with a pattern containing specific syntax (quotes, semicolons, etc.) and the implementation file is a .js/.ts/.mjs file that the formatter rewrites, the JUNIOR cannot fix this — lint will always revert the change. Check `biome.json` for the enforced formatting rules. If the test asserts on a pattern that the formatter will always rewrite, the correct verdict is `backpressure-bug` (fix the test), not `code-fix`.
+
 # YOUR OUTPUT CONTRACT
 
 Decide which of the following is true and emit EXACTLY ONE of these blocks at the end of your response. Nothing after them.
 
 ## Case A — implementation bug
 
-The test correctly captures the requirement. The JUNIOR misread the spec or introduced a regression. You will patch the implementation directly using Read/Edit/Write/Bash. After you finish, output:
+The test correctly captures the requirement. The JUNIOR misread the spec or introduced a regression. You will patch the implementation directly using Read/Edit/Write/Bash. After patching, run `npm run lint` and `npm run check-types`, then re-inspect the patched files to confirm your fix survives the formatter. If lint reverts your change, the test is asserting on something the formatter will always rewrite — switch to Case B (backpressure-bug) instead. After you finish, output:
 
 <verdict>code-fix</verdict>
 <summary>One sentence describing the root cause and what you changed.</summary>

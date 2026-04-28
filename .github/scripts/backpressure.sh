@@ -54,6 +54,7 @@ You are running in non-interactive mode, if you have a question, pick the soluti
         Example: \`assert_json \"has react\" \"_.dependencies.react\" \"./package.json\"\`
     - If none of the provided helpers fit your assertion, you MAY define a local helper in the script. Local helpers MUST record results by calling \`_pass \"desc\"\` and \`_fail \"desc\"\` (provided by the library). Do NOT manipulate PASS/FAIL counters directly or use \`((var++))\`.
     - Do NOT redefine PASS, FAIL, \`_pass\`, \`_fail\`, or \`report_results\`
+  - FORMATTER-STABLE ASSERTIONS: The validation pipeline runs \`npm run lint\` (auto-fix) on implementation files BEFORE running your test script. This means the file your assertions grep against will already be reformatted. Read \`biome.json\` to understand the active formatting rules (quote style, semicolons, trailing commas, indentation, etc.) and ensure your assertion patterns match the POST-FORMATTER output, not the raw source you might imagine. Prefer content-only patterns that avoid syntax characters (e.g., \`assert_grep \"has plugin\" \"@tailwindcss/postcss\" \"postcss.config.mjs\"\` instead of including surrounding quotes). When you must match syntax, use \`assert_grep_regex\` with flexible patterns (e.g., \`['\"]@tailwindcss/postcss['\"]\`).
 - The test file's own extension is chosen by the runner and the subject's language:
     - TypeScript subject (.ts, .tsx) → .test.ts / .spec.ts
     - JavaScript subject (.js, .jsx, .mjs, .cjs) → .test.js / .spec.js

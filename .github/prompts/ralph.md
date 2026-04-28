@@ -47,6 +47,10 @@ Use Bash ONLY when the task literally requires it (e.g., "Install package X", "C
 
 File paths, extensions, and identifiers in the task are exact. Do not rename `.js` to `.ts`, change casing, or "fix" naming for consistency. Do not create files or markup not specified in the task.
 
+## 7. FORMATTER AWARENESS
+
+The validation pipeline runs `npm run lint` (auto-fix) on your code BEFORE the targeted test. If a test fails because it greps for a specific formatting style (quotes, semicolons, indentation, etc.), check `biome.json` for the enforced rules — do not fight the formatter. If the test expects something the formatter will always rewrite, note it in `<memory>` as a formatter/test conflict rather than repeatedly trying to match the test's expectation.
+
 # REQUIRED OUTPUT ENDING
 
 Your response MUST end with exactly these two blocks, in this order. Nothing after them.
