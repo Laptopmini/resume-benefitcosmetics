@@ -1,1 +1,1 @@
-Created types/css.d.ts with `declare module '*.css';` to enable CSS imports in TypeScript without type errors.
+Disabled biome's `noUnknownAtRules` rule for CSS files since @tailwind directives are valid when `tailwindDirectives: true` parser option is set. Edit was in biome.json overrides section.
