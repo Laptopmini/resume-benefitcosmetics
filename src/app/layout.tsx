@@ -3,10 +3,14 @@ import { Caveat, Inter, Playfair_Display, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { COPY } from "@/content/resume";
 
-const playfair = Playfair_Display({ weight: ["900"], variable: "--font-display" });
-const caveat = Caveat({ weight: ["700"], variable: "--font-script" });
-const inter = Inter({ weight: ["400", "600"], variable: "--font-body" });
-const spaceMono = Space_Mono({ weight: ["700"], variable: "--font-mono" });
+const playfair = Playfair_Display({
+  weight: ["900"],
+  variable: "--font-display",
+  subsets: ["latin"],
+});
+const caveat = Caveat({ weight: ["700"], variable: "--font-script", subsets: ["latin"] });
+const inter = Inter({ weight: ["400", "600"], variable: "--font-body", subsets: ["latin"] });
+const spaceMono = Space_Mono({ weight: ["700"], variable: "--font-mono", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Paul-Valentin Mini — Lead Frontend Engineer",
