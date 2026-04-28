@@ -1,1 +1,1 @@
-Created src/components/ProfileCard.tsx with all required elements: section with editorial-card bg-blush, span with COPY.profileLabel, h2 with COPY.profileHeading, p with PROFILE.summary and data-testid, wrapped in motion.div with bannerEntrance.
+Fixed lint error in SkillsCard.tsx by using a suffix ('first'/'second') based on whether index is in first or second half of the duplicated array, instead of using raw index in the key.

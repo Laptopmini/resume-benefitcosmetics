@@ -17,7 +17,7 @@ export const bannerEntrance = {
 export const marqueeDrift = {
   animate: { x: ["0%", "-50%"] },
   transition: { duration: 22, ease: "linear", repeat: Infinity },
-} as const;
+};
 
 export function parallaxFloat(progress: number): number {
   return -40 + progress * 80;
