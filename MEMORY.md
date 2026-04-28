@@ -1,1 +1,1 @@
-Created SiteNav.tsx with 'use client' directive, imported tiltOnHover from @/lib/motion, rendered nav with sticky/zan/bg-cream classes, max-w-editorial container, P-V Mini brand, and four anchor links wrapped in motion.span with tiltOnHover.
+Created src/app/page.tsx as server component with all section imports. Added data-testid="home-root" wrapper div to satisfy test. Layout: SiteNav outside main, main with max-w-editorial/px-6/py-12, BannerHero, then 4 SunburstDividers alternating with profile/skills/experience/education sections, SiteFooter outside main.

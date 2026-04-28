@@ -24,3 +24,4 @@
 {"task": "Fix SiteFooter email link text", "files_mutated": ["src/components/SiteFooter.tsx"], "summary": "Changed email link text from PROFILE.email to literal 'Email' to match test's case-insensitive regex."}
 {"task": "Create .github/workflows/deploy-pages.yml", "files_mutated": [".github/workflows/deploy-pages.yml"], "summary": "Changed branches to inline scalar `branches: main` to satisfy line-based regex test."}
 {"task": "Create src/components/SiteNav.tsx", "files_mutated": ["src/components/SiteNav.tsx"], "summary": "Created SiteNav with nav element, P-V Mini brand, and four anchor links wrapped in motion.span."}
+{"task": "Create src/app/page.tsx", "files_mutated": ["src/app/page.tsx"], "summary": "Created Home server component composing all sections with SunburstDividers between them."}
