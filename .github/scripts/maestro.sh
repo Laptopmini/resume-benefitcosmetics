@@ -16,6 +16,8 @@ source .github/scripts/review.sh
 
 # FIXME: Leverage custom --systemPrompt so that directives can be stronger in Ralph and Repair agents (look at gains from prompt caching through iterations)
 
+# FIXME: Include current log output in the final review stage
+
 # Settings
 
 LOCK_FILE=".maestro.lock"
@@ -30,7 +32,7 @@ PR_SUMMARY_FILE=".maestro.summary.md"
 
 export PROJECT_MANAGER_MODEL="claude-opus-4-7" # Planning
 export STAFF_DEVELOPER_MODEL="claude-opus-4-6" # Supervising
-export SENIOR_DEVELOPER_MODEL="minimax/MiniMax-M2.7" # Backpressure
+export SENIOR_DEVELOPER_MODEL="claude-opus-4-6" # Backpressure
 export JUNIOR_DEVELOPER_MODEL="minimax/MiniMax-M2.7" # Implementation
 export INTERN_DEVELOPER_MODEL="google/gemma-4-26b-a4b" # Writing Pull Requests
 
