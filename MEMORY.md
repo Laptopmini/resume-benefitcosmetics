@@ -1,1 +1,1 @@
-The @types/react and @types/react-dom were incorrectly placed in dependencies instead of devDependencies. Moved them to devDependencies with the correct version specifiers.
+Created next.config.mjs with the exact configuration specified: output: 'export', basePath: '/ralph-node-resume', assetPrefix: '/ralph-node-resume', images: { unoptimized: true }, trailingSlash: true, reactStrictMode: true. Used export default as specified.
