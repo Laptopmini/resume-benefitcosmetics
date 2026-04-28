@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --rose: #c44a5e;
+  --cream: #f4ead5;
+  --ink: #1a1410;
+  --mustard: #d99a2b;
+  --mint: #6fa88e;
+  --blush: #f0c9c1;
+  --gold-foil: #c9a14a;
+}
+
+body {
+  background-color: var(--cream);
+  color: var(--ink);
+}
+
+@layer components {
+  .ink-rule {
+    @apply border-[3px] border-ink;
+  }
+
+  .editorial-card {
+    @apply ink-rule shadow-hard rounded-md bg-cream p-8;
+  }
+}
+
+@layer utilities {
+  .paper-grain {
+    background-image: radial-gradient(rgba(26, 20, 16, 0.06) 1px, transparent 1px);
+    background-size: 4px 4px;
+  }
+}
