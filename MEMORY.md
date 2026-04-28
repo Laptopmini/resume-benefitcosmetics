@@ -1,1 +1,1 @@
-Disabled biome's `noUnknownAtRules` rule for CSS files since @tailwind directives are valid when `tailwindDirectives: true` parser option is set. Edit was in biome.json overrides section.
+Created src/lib/basePath.ts with BASE_PATH constant and withBasePath/stripBasePath helper functions. All three exports match the test expectations in tests/unit/create-basepath-helper.test.ts.
