@@ -12,3 +12,4 @@
 {"task": "Create src/lib/basePath.ts", "files_mutated": ["src/lib/basePath.ts"], "summary": "Exported BASE_PATH, withBasePath, and stripBasePath functions."}
 {"task": "Create src/lib/motion.ts", "files_mutated": ["src/lib/motion.ts"], "summary": "Exported 4 motion preset constants and parallaxFloat function mapping [0,1] to [-40,40]."}
 {"task": "Create src/content/resume.ts", "files_mutated": ["src/content/resume.ts"], "summary": "Fixed EDUCATION array items to use { line: string } objects instead of plain strings."}
+{"task": "Create src/app/layout.tsx", "files_mutated": [], "summary": "File already existed with correct implementation — fonts, metadata, and classNames all match spec."}

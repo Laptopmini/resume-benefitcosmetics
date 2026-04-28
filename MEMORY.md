@@ -1,1 +1,1 @@
-Fixed type error in src/content/resume.ts. EDUCATION array items were plain strings but the type expected `{ line: string }[]`. Wrapped each string in an object literal.
+src/app/layout.tsx already existed and correctly implements the RootLayout per spec. All font imports, variables, metadata, and className assignments match the test expectations. No changes needed.

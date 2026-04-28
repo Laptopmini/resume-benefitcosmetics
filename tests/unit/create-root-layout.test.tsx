@@ -4,10 +4,16 @@ import React from "react";
 jest.mock(
   "next/font/google",
   () => ({
-    Playfair_Display: (cfg: { variable: string }) => ({ variable: cfg.variable, className: "mock-playfair" }),
+    Playfair_Display: (cfg: { variable: string }) => ({
+      variable: cfg.variable,
+      className: "mock-playfair",
+    }),
     Caveat: (cfg: { variable: string }) => ({ variable: cfg.variable, className: "mock-caveat" }),
     Inter: (cfg: { variable: string }) => ({ variable: cfg.variable, className: "mock-inter" }),
-    Space_Mono: (cfg: { variable: string }) => ({ variable: cfg.variable, className: "mock-space-mono" }),
+    Space_Mono: (cfg: { variable: string }) => ({
+      variable: cfg.variable,
+      className: "mock-space-mono",
+    }),
   }),
   { virtual: true },
 );
