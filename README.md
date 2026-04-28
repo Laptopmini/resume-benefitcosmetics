@@ -6,8 +6,13 @@ For full documentation on how to use `ralph-node` and these repos, see the [orig
 
 ## Prompt
 
-`npm run maestro -- \`
-> "Build a personal portfolio/resume website for Paul-Valentin Mini using the content in resume.md. The site must be a React single-page application using Next.js (App Router) with static export (output: 'export') for GitHub Pages deployment — no server-side features (no API routes, no getServerSideProps, no middleware). Configure basePath and assetPrefix to '/ralph-node-resume' for GitHub Pages. Use Tailwind CSS v4 for styling and Framer Motion for scroll-triggered animations and parallax effects. The design should be Apple.com-inspired: clean, minimal, generous whitespace, smooth transitions, and a parallax hero. Mobile-first responsive design. Sections: Hero with name/title/tagline using the headshot at profile.png and a subtle parallax background, Profile summary, Skills (visual chip/tag layout), Experience (scroll-revealed timeline with each role's details), Education & Certifications, and a sticky nav with smooth-scroll anchors. The first ticket must install all dependencies (next, react, react-dom, tailwindcss, framer-motion, @tailwindcss/postcss, etc.), configure Next.js for static export, set up the Tailwind theme (neutral color palette, Inter font), and create the app shell (layout, global styles, nav skeleton). A separate infra ticket must add a GitHub Actions workflow (.github/workflows/deploy.yml) that builds and deploys to GitHub Pages on push to main. All interactive and display elements must use data-testid attributes."
+```
+read -r -d '' PROMPT <<'EOF'
+Build a personal portfolio/resume website for Paul-Valentin Mini using the content in resume.md. The site must be a React single-page application GitHub Pages deployment. Make sure it has a workflow that builds and deploys to GitHub Pages on push to main, using '/ralph-node-resume' as a base path. The aesthetic direction needs to be playful retro-editorial, inspired by Benefit Cosmetics crossed with mid-century magazine layouts. The site should feel confident, witty, and warm — not corporate, not minimalist. Think vintage beauty-counter signage, kitschy pin-up posters, and Wes Anderson title cards reinterpreted for an engineer's resume. I also would love to see some neat animations, like starburst/sparkle, gentle tilt on hover, and parallax on decorative elements. Leverage popular open-source libraries like Tailwind CSS, Framer Motion, and Next.js if you think they're appropriate.
+EOF
+
+npm run maestro -- "$PROMPT"
+```
 
 ## Changelog
 
