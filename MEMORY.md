@@ -1,1 +1,1 @@
-src/app/layout.tsx already existed and correctly implements the RootLayout per spec. All font imports, variables, metadata, and className assignments match the test expectations. No changes needed.
+Fixed type error in Sparkle.tsx by removing `as const` from sparklePulse in src/lib/motion.ts. The readonly array literal was incompatible with framer-motion's mutable array expectation. Other constants retain `as const` since they're used in contexts that handle readonly tuples properly.

@@ -6,7 +6,7 @@ export const tiltOnHover = {
 export const sparklePulse = {
   animate: { opacity: [0, 1, 0], scale: [0.8, 1.2, 0.8] },
   transition: { duration: 1.6, repeat: Infinity, ease: "easeInOut" },
-} as const;
+};
 
 export const bannerEntrance = {
   initial: { y: 40, opacity: 0 },
