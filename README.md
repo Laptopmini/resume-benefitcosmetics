@@ -1,6 +1,6 @@
 # resume-benefitcosmetics
 
-A fork of [ralph-node](https://github.com/Laptopmini/ralph-node) that was prompted to build a website based on my resume based on Benefit Cosmetics styling, hosted on GitHub Pages.
+A fork of [ralph-node](https://github.com/Laptopmini/ralph-node) that was prompted to build a website based on my resume using Benefit Cosmetics' styling, hosted on GitHub Pages.
 
 ### [Learn more about the orchestration of this project](https://github.com/Laptopmini/ralph-node#readme)
 
